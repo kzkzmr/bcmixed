@@ -30,6 +30,7 @@
 #'   bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc == 8, ])
 #'
 #' @importFrom MASS ginv
+#' @importFrom stats lm model.matrix optimize
 #'
 #' @export
 bcreg <- function(formula, data){

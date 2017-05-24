@@ -1,5 +1,4 @@
-#' Model Median based on the Marginal Model of the Mixed Effect Model with the
-#' Box-Cox Transformation.
+#' Model Median Inference for Longitudinal Data in Randomized Clinical Trials.
 #'
 #' \code{bcmmrm} provides inference results for the model median differences
 #' between treatment groups proposed by Maruo et al. (2017), which focuses on
@@ -68,8 +67,9 @@
 #' # and sex (nominal variable), covariance structure: UN structure
 #' lmd.bl <- bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc==8, ])$lambda
 #' aidscd4$cd4.bl.tr <- (aidscd4$cd4.bl^lmd.bl-1)/lmd.bl
-#' bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr", "age", "sex"), c(0, 0, 1), structure = "AR(1)")
+#' bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr"), c(0), structure = "AR(1)")
 #'
+#' @importFrom stats model.matrix pnorm pt qnorm qt
 #'
 #' @export
 bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,

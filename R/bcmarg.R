@@ -51,10 +51,12 @@
 #'
 #' @examples
 #'  data(aidscd4)
-#'  bcmarg(cd4 ~ as.factor(treatment) + as.factor(weekc) + as.factor(treatment):as.factor(weekc), aidscd4, weekc, id, "AR(1)")
+#'  bcmarg(cd4 ~ as.factor(treatment), aidscd4, weekc, id, "AR(1)")
 #'
-#' @importFrom nlme gls
+#' @importFrom nlme gls glsControl corSymm varIdent corCompSymm corAR1
+#'             corMatrix
 #' @importFrom MASS ginv
+#' @importFrom stats coef ftable model.matrix na.omit optimize xtabs
 #'
 #' @export
 bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
