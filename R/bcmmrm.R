@@ -23,22 +23,27 @@
 #'
 #' @return bcmmrm returns a list including following components for the model
 #'   median inference. \describe{
-#'     \item{median}{inrefence results for the model medians for all groups.}
-#'     \item{meddif.mod}{model-based inference results for the model median
+#'     \item{\code{median}}{inrefence results for the model medians for all
+#'           groups.}
+#'     \item{\code{meddif.mod}}{model-based inference results for the model
+#'           median differences between all pairs of groups.}
+#'     \item{\code{meddif.rob}}{robust inference results for the model median
 #'           differences between all pairs of groups.}
-#'     \item{meddif.rob}{robust inference results for the model median
-#'           differences between all pairs of groups.}
-#'     \item{meddif.mod.adj}{model-based inference results for the model
+#'     \item{\code{meddif.mod.adj}}{model-based inference results for the model
 #'           median differences between all pairs of groups with the empirical
 #'           adjustment.}
-#'     \item{meddif.rob.adj}{robust inference results for the model median
-#'           differences between all pairs of groups with the empirical
+#'     \item{\code{meddif.rob.adj}}{robust inference results for the model
+#'           median differences between all pairs of groups with the empirical
 #'           adjustment.}
-#'     \item{lambda}{estimate of a transformation parameter.}
-#'     \item{R}{correlation matrix for any subject with no missing values.}
-#'     \item{transformed}{inference results for beta under the assumption
+#'     \item{\code{lambda}}{estimate of a transformation parameter.}
+#'     \item{\code{R}}{correlation matrix for any subject with no missing
+#'           values.}
+#'     \item{\code{betainf}}{inference results for beta under the assumption
 #'           that lambda is known.}
-#'     \item{inf.marg}{result of \code{\link{bcmarg}} function.}
+#'     \item{\code{inf.marg}}{result of \code{\link{bcmarg}} function.}
+#'     \item{\code{outdata}}{data frame where the transformed outcome
+#'           (\code{ytr}) and the fitted value (\code{ytr.fitted}) on the
+#'           transformed scale are added ito input data.}
 #'   }
 #'
 #' @note If baseline observation for the outcome variable is available, Box-Cox
@@ -76,9 +81,10 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                    timepoint = NULL, covv = NULL, cfactor = NULL,
                    structure = "UN"){
   y <- deparse(substitute(outcome))
+  data0 <- data
   group <- deparse(substitute(group))
-  data$group <- data[, group]
-  data$y <- data[, y]
+  data0$group <- data0[, group]
+  data0$y <- data0[, y]
   covform <- ""
   cct <- 0
   if (!is.null(covv)){
@@ -88,7 +94,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
         covform <- paste(covform, "+", covv[i])
       } else {
         covform <- paste(covform, "+as.factor(", covv[i], ")")
-        cct[i] <- length(unique(data[, covv[i]])) - 1
+        cct[i] <- length(unique(data0[, covv[i]])) - 1
       }
     }
   }
@@ -96,27 +102,27 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   if (deparse(substitute(time)) != "NULL" & deparse(substitute(id)) != "NULL"){
     time <- deparse(substitute(time))
     id <- deparse(substitute(id))
-    data$time0 <- data[, time]
-    time.tbl <- sort(unique(data$time0))
+    data0$time0 <- data0[, time]
+    time.tbl <- sort(unique(data0$time0))
     for (i in 1:length(time.tbl)){
-      data[data$time0 == time.tbl[i], "time"] <- i
+      data0[data0$time0 == time.tbl[i], "time"] <- i
       if (time.tbl[i] == timepoint) {
         tp0 <- i
       }
     }
-    data$id <- data[, id]
+    data0$id <- data0[, id]
     formula <- formula(paste("y ~ as.factor(group) + as.factor(time) +
                              as.factor(group):as.factor(time)", covform))
-    nt <- length(unique(data$time))
+    nt <- length(unique(data0$time))
     rm(id)
     rm(time)
-    try1 <- try(bcmarg(formula, data, time, id, structure))
+    try1 <- try(bcmarg(formula, data0, time, id, structure))
   } else {
     formula <- formula(paste("y ~ as.factor(group)", covform))
-    data$time <- 1
+    data0$time <- 1
     nt <- 1
     tp0 <- 1
-    try1 <- try(bcmarg(formula, data))
+    try1 <- try(bcmarg(formula, data0))
   }
 
   if (class(try1) != "try-error"){
@@ -126,21 +132,21 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     alp <- try1$alpha
     V <- try1$V
     RR <- V / (sqrt(diag(V)) %*% t(sqrt(diag(V))))
-    ng <- length(unique(data$group))
+    ng <- length(unique(data0$group))
     nc <- sum(cct)
     nb <- length(beta)
     ns <- length(alp)
     iII <- try1$Vtheta.mod
     iIIr <- try1$Vtheta.rob
     options(na.action = "na.pass")
-    X <- model.matrix(formula, data = data)
+    X <- model.matrix(formula, data = data0)
     dimnames(X) <- NULL
     xcm <- 0
     if (!is.null(covv)){
       if (nc == 1)  {
-        xcm <- mean(X[data$time == unique(data$time)[1], ng + nt])
+        xcm <- mean(X[data0$time == unique(data0$time)[1], ng + nt])
       } else {
-        xcm <- c(colMeans(X[data$time == unique(data$time)[1],
+        xcm <- c(colMeans(X[data0$time == unique(data0$time)[1],
                             (ng + nt):(ng + nt + nc - 1)]))
       }
     }
@@ -262,10 +268,17 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                                  delta = delta, SE = SEdr2, lower.CL = lowerr2,
                                  upper.CL = upperr2, t.value = tvaluer2,
                                  p.value = pvaluer2)
+
+    fitted <- try1$glsresult$fitted
+    data$ytr <- (data0$y^le-1)/le
+    data$ytr.fitted <- data$ytr
+    data$ytr.fitted[!is.na(data$ytr.fitted)] <- fitted
+
     result <- list(median = medres, meddif.naive = meddif.mod,
                    meddif.rob = meddif.rob, meddif.mod.adj = meddif.mod.adj,
                    meddif.rob.adj = meddif.rob.adj, lambda = le, R = RR,
-                   lik = lik, transformed = try1$transformed, inf.marg = try1)
+                   lik = lik, betainf = try1$transformed, inf.marg = try1,
+                   outdata = data)
   } else {
     result <- "Not converged"
   }

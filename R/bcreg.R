@@ -12,12 +12,14 @@
 #'
 #' @return LmeMargBc returns a list including following conponents:
 #' \describe{
-#'   \item{lambda}{estimate of a transformation parameter.}
-#'   \item{beta}{estimate of a regression parameter vector.}
-#'   \item{sigma}{estimate of a scale parameter.}
-#'   \item{transformed}{inference results for beta under the
+#'   \item{\code{lambda}}{estimate of a transformation parameter.}
+#'   \item{\code{beta}}{estimate of a regression parameter vector.}
+#'   \item{\code{sigma}}{estimate of a scale parameter.}
+#'   \item{\code{betainf}}{inference results for beta under the
 #'         assumption that lambda is known.}
-#'   \item{lik}{maximized liklihood.}
+#'   \item{\code{lik}}{maximized liklihood.}
+#'   \item{\code{lmresult}}{results of \code{lm} function on the
+#'         transformed scale}
 #' }
 #'
 #' @references Box, G.E.P. and Cox, D.R. (1964). An analysis of transformations
@@ -70,8 +72,9 @@ bcreg <- function(formula, data){
   data$z <- as.numeric(z)
   evars <- as.character(formula)[3]
   formula2 <- formula(paste("z~", evars))
-  bcres <- summary(lm(formula2, data))$coefficients
+  lmres <- lm(formula2, data)
+  bcres <- summary(lmres)$coefficients
   res <- list(lambda = lmd, beta = as.numeric(beta), sigma = sgm,
-              transformed = bcres, lik = lik)
+              betainf = bcres, lik = lik, lmresult = lmres)
   return(res)
 }

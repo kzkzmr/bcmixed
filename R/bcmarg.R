@@ -25,7 +25,7 @@
 #'   \item{\code{alpha}}{estimate of a scale parameter vector.}
 #'   \item{\code{V}}{variace-covariance matrix for any subject with no missing
 #'         values.}
-#'   \item{\code{transformed}}{inference results for beta under the assumption
+#'   \item{\code{betainf}}{inference results for beta under the assumption
 #'         that lambda is known.}
 #'   \item{\code{Vtheta.mod}}{model-based variance-covariance matrix for MLE of
 #'         a vector of all parameters.}
@@ -34,8 +34,10 @@
 #'   \item{\code{lik}}{maximized liklihood.}
 #'   \item{\code{adj.prm}}{small-sample adjustment parameter used in
 #'         \code{\link{bcmmrm}}: c(number of subjects, number of
-#'         completed subjects, number of outcome observations,
-#'         number of missing observations)}
+#'         completed subjects, number of outcome observations, number of
+#'         missing observations).}
+#'   \item{\code{glsresult}}{results for \code{gls} (or \code{lm} when time
+#'         and id are not specified) function on the transformed scale. }
 #' }
 #'
 #' @references \itemize{
@@ -180,6 +182,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
       bcres <- try1$transformed
       structure <- "UN"
       lik <- try1$lik
+      RS <- try1$lmresult
     } else {
       le <- try1$maximum
       lik <- try1$objective
@@ -470,8 +473,8 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
     iII <- ginv(-H)
     iIIr <- iII %*% J %*% iII
     res <- list(lambda = le, beta = beta, alpha = alp, V = V,
-                transformed = bcres, Vtheta.mod = iII, Vtheta.rob = iIIr,
-                lik = lik, adj.prm = adj.prm)
+                betainf = bcres, Vtheta.mod = iII, Vtheta.rob = iIIr,
+                lik = lik, adj.prm = adj.prm, glsresult = RS)
     return(res)
   }
 }
