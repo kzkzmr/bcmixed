@@ -35,15 +35,15 @@ bcmmrm returns a list including following components for the model
     \item{\code{median}}{inrefence results for the model medians for all
           groups.}
     \item{\code{meddif.mod}}{model-based inference results for the model
-          median differences between all pairs of groups.}
+          median differences between all pairs of groups (group1 - group0).}
     \item{\code{meddif.rob}}{robust inference results for the model median
-          differences between all pairs of groups.}
+          differences between all pairs of groups (group1 - group0).}
     \item{\code{meddif.mod.adj}}{model-based inference results for the model
           median differences between all pairs of groups with the empirical
-          adjustment.}
+          adjustment (group1 - group0).}
     \item{\code{meddif.rob.adj}}{robust inference results for the model
           median differences between all pairs of groups with the empirical
-          adjustment.}
+          adjustment (group1 - group0).}
     \item{\code{lambda}}{estimate of a transformation parameter.}
     \item{\code{R}}{correlation matrix for any subject with no missing
           values.}
@@ -52,7 +52,7 @@ bcmmrm returns a list including following components for the model
     \item{\code{inf.marg}}{result of \code{\link{bcmarg}} function.}
     \item{\code{outdata}}{data frame where the transformed outcome
           (\code{ytr}) and the fitted value (\code{ytr.fitted}) on the
-          transformed scale are added ito input data.}
+          transformed scale are added to input data.}
   }
 }
 \description{
@@ -76,10 +76,10 @@ data(aidscd4)
 # covariates: no covariate, covariance structure: CS structure
 bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, structure="CS")
 
-# covariate: Box-Cox transformed baseline,age (continuous variables),
-# and sex (nominal variable), covariance structure: UN structure
-lmd.bl <- bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc==8, ])$lambda
-aidscd4$cd4.bl.tr <- (aidscd4$cd4.bl^lmd.bl-1)/lmd.bl
+# covariate: Box-Cox transformed baseline (continuous variables),
+# covariance structure: AR(1) structure
+lmd.bl <- bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc == 8, ])$lambda
+aidscd4$cd4.bl.tr <- (aidscd4$cd4.bl ^ lmd.bl - 1) / lmd.bl
 bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr"), c(0), structure = "AR(1)")
 
 }
@@ -90,7 +90,7 @@ bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr"), c(0), structure =
         \emph{Statistics in Medicine}, 34, 1634-1644.\cr
   \item Maruo, K., Yamaguchi, Y., Noma, H., Gosho, M. (2017). Interpretable
         inference on the mixed effect model with the Box-Cox transformation.
-        \emph{Statistics in Medicine}, early view (DOI: 10.1002/sim.7279).
+        \emph{Statistics in Medicine}, 36, 2420-2434.
 }
 }
 \seealso{

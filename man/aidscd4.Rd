@@ -23,12 +23,13 @@
 }
 \description{
 The data are from a randomized, double-blind study of acquired immune
-deficiency syndrome (AIDS) patients with advanced immune suppression (cluster
-of differentiation 4 (CD4) cells count of less than or equal to 50
-cells/mm3). Patients in the AIDS Clinical Trial Group Study 193A were
-randomized to dual or triple combinations of human immunodeficiency virus-1
-reverse transcriptase inhibitors. Specifically, patients were randomized to
-one of four daily regimens.
+deficiency syndrome (AIDS) patients with advanced immune suppression
+(cluster of differentiation 4 (CD4) cells count of less than or equal to 50
+cells/mm3) (Henry et al., 1998; Fitzmaurice et al., 2011). Patients in the
+AIDS Clinical Trial Group Study 193A were randomized to dual or triple
+combinations of human immunodeficiency virus-1 reverse transcriptase
+inhibitors. Specifically, patients were randomized to one of four daily
+regimens.
 }
 \examples{
 data(aidscd4)

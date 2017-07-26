@@ -26,15 +26,15 @@
 #'     \item{\code{median}}{inrefence results for the model medians for all
 #'           groups.}
 #'     \item{\code{meddif.mod}}{model-based inference results for the model
-#'           median differences between all pairs of groups.}
+#'           median differences between all pairs of groups (group1 - group0).}
 #'     \item{\code{meddif.rob}}{robust inference results for the model median
-#'           differences between all pairs of groups.}
+#'           differences between all pairs of groups (group1 - group0).}
 #'     \item{\code{meddif.mod.adj}}{model-based inference results for the model
 #'           median differences between all pairs of groups with the empirical
-#'           adjustment.}
+#'           adjustment (group1 - group0).}
 #'     \item{\code{meddif.rob.adj}}{robust inference results for the model
 #'           median differences between all pairs of groups with the empirical
-#'           adjustment.}
+#'           adjustment (group1 - group0).}
 #'     \item{\code{lambda}}{estimate of a transformation parameter.}
 #'     \item{\code{R}}{correlation matrix for any subject with no missing
 #'           values.}
@@ -43,7 +43,7 @@
 #'     \item{\code{inf.marg}}{result of \code{\link{bcmarg}} function.}
 #'     \item{\code{outdata}}{data frame where the transformed outcome
 #'           (\code{ytr}) and the fitted value (\code{ytr.fitted}) on the
-#'           transformed scale are added ito input data.}
+#'           transformed scale are added to input data.}
 #'   }
 #'
 #' @note If baseline observation for the outcome variable is available, Box-Cox
@@ -58,7 +58,7 @@
 #'         \emph{Statistics in Medicine}, 34, 1634-1644.\cr
 #'   \item Maruo, K., Yamaguchi, Y., Noma, H., Gosho, M. (2017). Interpretable
 #'         inference on the mixed effect model with the Box-Cox transformation.
-#'         \emph{Statistics in Medicine}, early view (DOI: 10.1002/sim.7279).
+#'         \emph{Statistics in Medicine}, 36, 2420-2434.
 #' }
 #'
 #' @seealso \code{\link{bcmarg}}
@@ -68,10 +68,10 @@
 #' # covariates: no covariate, covariance structure: CS structure
 #' bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, structure="CS")
 #'
-#' # covariate: Box-Cox transformed baseline,age (continuous variables),
-#' # and sex (nominal variable), covariance structure: UN structure
-#' lmd.bl <- bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc==8, ])$lambda
-#' aidscd4$cd4.bl.tr <- (aidscd4$cd4.bl^lmd.bl-1)/lmd.bl
+#' # covariate: Box-Cox transformed baseline (continuous variables),
+#' # covariance structure: AR(1) structure
+#' lmd.bl <- bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc == 8, ])$lambda
+#' aidscd4$cd4.bl.tr <- (aidscd4$cd4.bl ^ lmd.bl - 1) / lmd.bl
 #' bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr"), c(0), structure = "AR(1)")
 #'
 #' @importFrom stats model.matrix pnorm pt qnorm qt
@@ -114,6 +114,15 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     formula <- formula(paste("y ~ as.factor(group) + as.factor(time) +
                              as.factor(group):as.factor(time)", covform))
     nt <- length(unique(data0$time))
+    casenames <- names(table(data$id))
+    msflg <- table(data0$id, is.na(data0$y))[, 1]
+    N <- sum(msflg != 0)
+    omis <- names(msflg)[msflg == 0]
+    if (length(omis) > 0L){
+      for (i in 1:length(omis)){
+        data0 <- data0[data0$id != omis[i], ]
+      }
+    }
     rm(id)
     rm(time)
     try1 <- try(bcmarg(formula, data0, time, id, structure))
@@ -140,14 +149,16 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     iIIr <- try1$Vtheta.rob
     options(na.action = "na.pass")
     X <- model.matrix(formula, data = data0)
+    if (nt != 1){
+      X <- X[!duplicated(data0$id), ]
+    }
     dimnames(X) <- NULL
     xcm <- 0
     if (!is.null(covv)){
       if (nc == 1)  {
-        xcm <- mean(X[data0$time == unique(data0$time)[1], ng + nt])
+        xcm <- mean(X[, ng + nt])
       } else {
-        xcm <- c(colMeans(X[data0$time == unique(data0$time)[1],
-                            (ng + nt):(ng + nt + nc - 1)]))
+        xcm <- c(colMeans(X[, (ng + nt):(ng + nt + nc - 1)]))
       }
     }
     xi <- numeric(ng)
@@ -190,7 +201,6 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
       SExi[i] <- sqrt(c(t(Dt[, i]) %*% iII %*% Dt[, i]))
       SExir[i] <- sqrt(c(t(Dt[, i]) %*% iIIr %*% Dt[, i]))
     }
-
     cbn <- choose(ng, 2)
     comb <- matrix(0, cbn, 2)
     count <- 1

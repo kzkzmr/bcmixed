@@ -65,7 +65,7 @@ marginal model parameter inference:
         \emph{Statistics in Medicine}, 34, 1634-1644.\cr
   \item Maruo, K., Yamaguchi, Y., Noma, H., Gosho, M. (2017). Interpretable
         inference on the mixed effect model with the Box-Cox transformation.
-        \emph{Statistics in Medicine}, early view (DOI: 10.1002/sim.7279).
+        \emph{Statistics in Medicine}, 36, 2420-2434.
 }
 }
 \seealso{

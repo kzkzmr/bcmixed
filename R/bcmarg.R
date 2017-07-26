@@ -46,7 +46,7 @@
 #'         \emph{Statistics in Medicine}, 34, 1634-1644.\cr
 #'   \item Maruo, K., Yamaguchi, Y., Noma, H., Gosho, M. (2017). Interpretable
 #'         inference on the mixed effect model with the Box-Cox transformation.
-#'         \emph{Statistics in Medicine}, early view (DOI: 10.1002/sim.7279).
+#'         \emph{Statistics in Medicine}, 36, 2420-2434.
 #' }
 #'
 #' @seealso \code{\link{bcmmrm}}
@@ -144,6 +144,8 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
     try1 <- try(bcreg(formula, data))
     nt <- 1
     data$id <- as.character(1:nrow(data))
+    msflg <- table(data$id, is.na(data$y))[, 1]
+    N <- sum(msflg != 0)
   } else {
     evars <- as.character(formula)[3]
     timec <- deparse(substitute(time))
@@ -155,7 +157,29 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
       time2[data[, timec] == ttbl[i]] <- i
     }
     data$time <- time2
-    nt <- length(unique(data$time))
+    casenames <- names(table(data$id))
+    msflg <- table(data$id, is.na(data$y))[, 1]
+    N <- sum(msflg != 0)
+    omis <- names(msflg)[msflg == 0]
+    if (length(omis) > 0L){
+      for (i in 1:length(omis)){
+        data <- data[data$id != omis[i], ]
+      }
+    }
+    data0 <- data[!duplicated(data$id),]
+    data0$y <- NULL
+    data01 <- data0
+    data1 <- c()
+    for (i in 1:nt){
+      data01$time <- i
+      data1 <- rbind(data1,data01)
+    }
+    data2 <- data[, c("id", "time", "y")]
+    data <- merge(data2, data1, by = c("id", "time"), all = T)
+    for (i in 1:nt){
+      data[data$time == i, timec] <- ttbl[i]
+    }
+
     if (nt == 1){
       try1 <- try(bcreg(formula, data))
     } else {
@@ -221,11 +245,13 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
       beta <- as.numeric(RS$coefficients)
       bcres <- summary(RS)$tTable
     }
-
     ns <- length(alp)
     msflg <- table(data$id, is.na(data$y))[, 1]
     N <- sum(msflg != 0)
     omis <- names(msflg)[msflg == 0]
+    table(data$id)
+    idt <- cbind((1:N) %x% (numeric(nt) + 1), (numeric(N) + 1) %x% (1:nt))
+
     if (length(omis) > 0L){
       for (i in 1:length(omis)){
         data <- data[data$id != omis[i], ]
