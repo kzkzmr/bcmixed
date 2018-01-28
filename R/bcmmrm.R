@@ -42,8 +42,9 @@
 #'           that lambda is known.}
 #'     \item{\code{inf.marg}}{result of \code{\link{bcmarg}} function.}
 #'     \item{\code{outdata}}{data frame where the transformed outcome
-#'           (\code{ytr}) and the fitted value (\code{ytr.fitted}) on the
-#'           transformed scale are added to input data.}
+#'           (\code{ytr}), the fitted value on the transformed scale
+#'           (\code{ytr.fitted}), and the residual on the transformed scale
+#'           (\code{ytr.fitted}) are added to input data.}
 #'   }
 #'
 #' @note If baseline observation for the outcome variable is available, Box-Cox
@@ -279,10 +280,9 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                                  upper.CL = upperr2, t.value = tvaluer2,
                                  p.value = pvaluer2)
 
-    fitted <- try1$glsresult$fitted
     data$ytr <- (data0$y^le-1)/le
-    data$ytr.fitted <- data$ytr
-    data$ytr.fitted[!is.na(data$ytr.fitted)] <- fitted
+    data$ytr.fitted <- try1$glsresult$fitted
+    data$res.tr <- data$ytr - fitted
 
     result <- list(median = medres, meddif.naive = meddif.mod,
                    meddif.rob = meddif.rob, meddif.mod.adj = meddif.mod.adj,
