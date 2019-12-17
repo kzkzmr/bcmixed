@@ -27,10 +27,11 @@
 #'         parameter.}
 #'   \item{\code{beta}}{a vector with the estimates of the regression
 #'         parameters.}
-#'   \item{\code{alpha}}{a vector with the estimates of the scale parameters.}
+#'   \item{\code{alpha}}{a vector with the estimates of the covariance
+#'         parameters.}
 #'   \item{\code{V}}{variance-covariance matrix for any subject with no missing
 #'         values.}
-#'   \item{\code{betainf}}{a data frame containing the inference results for
+#'   \item{\code{betainf}}{a matrix containing the inference results for
 #'        \code{beta} under the assumption that lambda is known.}
 #'   \item{\code{Vtheta.mod}}{model-based variance-covariance matrix for MLE of
 #'         the vector of all parameters: \code{c(lambda, beta, alpha)}.}
@@ -552,7 +553,7 @@ print.bcmarg <-
         format(x$lambda, digit = digits), "\n")
     cat("  Log-likelihood: ", format(x$logLik), "\n", sep = "")
     cat("\nCoefficients:\n")
-    print(x$beta, digit = digits)
+    print(x$beta, digit = digits, ...)
     invisible(x)
   }
 
@@ -586,7 +587,7 @@ print.summary.bcmarg <-
     cat("  Estimated transformation parameter: ",
         format(x$lambda, digits = digits), "\n")
     cat("\nCoefficients on the transformed scale:\n")
-    print(betainf, digits = digits)
+    print(betainf, digits = digits, ...)
     cat("\n *NOTE* : Inference results under the assumption that \n")
     cat("          transformation parameter is known are provided.\n")
     cat("          Although statistical test would be asymptotically\n")
@@ -594,6 +595,6 @@ print.summary.bcmarg <-
     cat("\nCovariance parameters on the transformed scale:\n")
     print(x$alp, digits = digits)
     cat("\nCorrelations on the transformed scale:\n")
-    print(R, digits = digits)
+    print(R, digits = digits, ...)
     invisible(x)
   }

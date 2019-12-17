@@ -105,7 +105,7 @@ print.summary.bcmmrm <-
       medt[, 1] <- x$group.tbl$label
       cat("\n", "\nModel median inferences for", deparse(x$call$time), "=" ,
           x$time.tbl$label[t], "\n","\n")
-      print(medt, digits = digits)
+      print(medt, digits = digits, ...)
     }
     for (t in 1:nt){
       dift <- x$meddif[[t]]
@@ -117,7 +117,7 @@ print.summary.bcmmrm <-
           names(dift)[1], "-", names(dift)[2], ") for", deparse(x$call$time),
           "=", x$time.tbl$label[t], "\n","\n")
       dift[, 8] <- round(dift[, 8], digits = digits)
-      print(dift, digits = digits)
+      print(dift, digits = digits, ...)
     }
     invisible(x)
   }

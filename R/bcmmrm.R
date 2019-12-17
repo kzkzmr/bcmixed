@@ -8,20 +8,20 @@
 #' inference results reduce to the results for the context of linear regression
 #' model provided by Maruo et al. (2015).
 #'
-#' @param outcome an object name of positive outcome (dependent) variable
-#'   included in \code{data}.
-#' @param group an object name of treatment group variable included in \code{data}.
+#' @param outcome a name of positive outcome (dependent) variable included in
+#'   \code{data}.
+#' @param group  a name of treatment group variable included in \code{data}.
 #' @param data a data frame which may include \code{outcome}, \code{group},
 #'   \code{time}, \code{id}, and specified covariate variables.
-#' @param time an object name of time variable for repeated measurements included
-#'   in \code{data}. default is \code{NULL}.
-#' @param id an object name of subject id variable for repeated measurements.
-#'   default is \code{NULL}.
-#' @param covv a character vector with names of covariate variables.
-#'   default is \code{NULL}.
+#' @param time a name of time variable for repeated measurements included
+#'   in \code{data}. Default is \code{NULL}.
+#' @param id a name of subject id variable for repeated measurements included
+#'   in \code{data}. Default is \code{NULL}.
+#' @param covv a character vector with names of covariate variables included
+#'   in \code{data}. Default is \code{NULL}..
 #' @param cfactor an integer vector including nominal variable indicators for
-#'   covariate variables. nominal variable: \code{1}, continuous variable:
-#'   \code{0}. default is \code{NULL}.
+#'   covariate variables. Nominal variable: \code{1}, continuous variable:
+#'   \code{0}. Default is \code{NULL}.
 #' @param structure specify the covariance structure from \code{c("UN", "CS",
 #'   "AR(1)")}. Default is \code{"UN"}.
 #' @param lmdint a vector containing the end-points of the interval to be

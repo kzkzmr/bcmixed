@@ -3,7 +3,6 @@
 \docType{package}
 \name{bcmixed}
 \alias{bcmixed}
-\alias{bcmixed-package}
 \title{bcmixed: A package for mixed effect models with the Box-Cox transformations.}
 \description{
 The bcmixed package provides three categories of important functions:

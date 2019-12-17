@@ -4,15 +4,21 @@
 \alias{bcmarg}
 \title{Marginal Model of the Mixed Effect Model with the Box-Cox Transformation.}
 \usage{
-bcmarg(formula, data, time = NULL, id = NULL, structure = "UN")
+bcmarg(
+  formula,
+  data,
+  time = NULL,
+  id = NULL,
+  structure = "UN",
+  lmdint = c(-3, 3)
+)
 }
 \arguments{
 \item{formula}{a two-sided linear formula object describing the model, with
 the response on the left of a ~ operator and the terms, separated by +
 operators, on the right.}
 
-\item{data}{a data frame in which to interpret the variables named in the
-formula.}
+\item{data}{a data frame containing the variables used in the model.}
 
 \item{time}{time variable name for repeated measurements. Default is NULL.}
 
@@ -21,29 +27,38 @@ NULL.}
 
 \item{structure}{specify the covariance structure from c("UN", "CS",
 "AR(1)"). Default is "UN".}
+
+\item{lmdint}{a vector containing the end-points of the interval to be
+searched for a transformation parameter. Default is c(-3, 3).}
 }
 \value{
-bcmarg returns a list including following conponents for the
-marginal model parameter inference:
+an object of class "\code{bcmarg}". Objects of this class have
+methods for the generic functions  \code{coef}, \code{logLik},
+\code{print}, and \code{summary}. The object includes following conponents
+for the marginal model parameter inference:
 \describe{
-  \item{\code{lambda}}{estimate of a transformation parameter.}
-  \item{\code{beta}}{estimate of a regression parameter vector.}
-  \item{\code{alpha}}{estimate of a scale parameter vector.}
-  \item{\code{V}}{variace-covariance matrix for any subject with no missing
+  \item{\code{lambda}}{a numeric value of the estimate of the transformation
+        parameter.}
+  \item{\code{beta}}{a vector with the estimates of the regression
+        parameters.}
+  \item{\code{alpha}}{a vector with the estimates of the covariance
+        parameters.}
+  \item{\code{V}}{variance-covariance matrix for any subject with no missing
         values.}
-  \item{\code{betainf}}{inference results for beta under the assumption
-        that lambda is known.}
+  \item{\code{betainf}}{a matrix containing the inference results for
+       \code{beta} under the assumption that lambda is known.}
   \item{\code{Vtheta.mod}}{model-based variance-covariance matrix for MLE of
-        a vector of all parameters.}
+        the vector of all parameters: \code{c(lambda, beta, alpha)}.}
   \item{\code{Vtheta.rob}}{robust variance-covariance matrix for MLE of
-        a vector of all parameters.}
-  \item{\code{lik}}{maximized liklihood.}
-  \item{\code{adj.prm}}{small-sample adjustment parameter used in
-        \code{\link{bcmmrm}}: c(number of subjects, number of
-        completed subjects, number of outcome observations, number of
-        missing observations).}
-  \item{\code{glsresult}}{results for \code{gls} (or \code{lm} when time
-        and id are not specified) function on the transformed scale. }
+        the vector of all parameters.}
+  \item{\code{logLik}}{a numeric value of the maximized likelihood.}
+  \item{\code{adj.prm}}{a vector with parameters used for the empirical
+        small sample adjustment in \code{\link{bcmmrm}}:
+        c(number of subjects, number of completed subjects, number of
+        outcome observations, number of missing observations).}
+  \item{\code{glsObject}}{an object of "\code{gls}" (or "\code{lm}" when
+        \code{time} and \code{id} are not specified) containing results of
+        \code{gls} (or \code{lm}) function on the transformed scale. }
 }
 }
 \description{
@@ -55,7 +70,9 @@ marginal model parameter inference:
 }
 \examples{
  data(aidscd4)
- bcmarg(cd4 ~ as.factor(treatment), aidscd4, weekc, id, "AR(1)")
+ bcmarg(cd4 ~ as.factor(treatment) + as.factor(weekc) +
+        as.factor(treatment):as.factor(weekc),
+        data = aidscd4, time = weekc, id = id, structure = "AR(1)")
 
 }
 \references{
@@ -69,5 +86,5 @@ marginal model parameter inference:
 }
 }
 \seealso{
-\code{\link{bcmmrm}}
+\code{\link{bcmmrm}} \code{\link{gls}}
 }

@@ -4,7 +4,7 @@
 \alias{bcreg}
 \title{Linear regression model with the Box-Cox Transformation.}
 \usage{
-bcreg(formula, data)
+bcreg(formula, data, lmdint = c(-3, 3))
 }
 \arguments{
 \item{formula}{a two-sided linear formula object describing the model, with
@@ -13,18 +13,24 @@ operators, on the right.}
 
 \item{data}{a data frame in which to interpret the variables named in the
 formula.}
+
+\item{lmdint}{a vector containing the end-points of the interval to be
+searched for a transformation parameter. Default is c(-3, 3).}
 }
 \value{
 LmeMargBc returns a list including following conponents:
 \describe{
-  \item{\code{lambda}}{estimate of a transformation parameter.}
-  \item{\code{beta}}{estimate of a regression parameter vector.}
-  \item{\code{sigma}}{estimate of a scale parameter.}
-  \item{\code{betainf}}{inference results for beta under the
-        assumption that lambda is known.}
-  \item{\code{lik}}{maximized liklihood.}
-  \item{\code{lmresult}}{results of \code{lm} function on the
-        transformed scale}
+  \item{\code{lambda}}{a numeric value with the estimate of
+        the transformation parameter.}
+  \item{\code{beta}}{a vector with the estimates of the regression
+        parameters.}
+  \item{\code{sigma}}{a numeric value with the estimate of the scale
+        parameter.}
+  \item{\code{betainf}}{a data frame with inference results for \code{beta}
+        under the assumption that \code{lambda} is known.}
+  \item{\code{lik}}{a numeric value with the maximized liklihood.}
+  \item{\code{lmObject}}{an object of "\code{lm}" containing the results of
+        \code{lm} function on the transformed scale}
 }
 }
 \description{
@@ -42,4 +48,7 @@ the linear regression models with the Box-Cox transformation (Box and Cox,
 Box, G.E.P. and Cox, D.R. (1964). An analysis of transformations
 (with discussion). Journals of the Royal Statistical Society, Series B, 26,
 211-246.
+}
+\seealso{
+\code{\link{lm}}
 }

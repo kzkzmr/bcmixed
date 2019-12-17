@@ -4,65 +4,71 @@
 \alias{bcmmrm}
 \title{Model Median Inference for Longitudinal Data in Randomized Clinical Trials.}
 \usage{
-bcmmrm(outcome, group, data, time = NULL, id = NULL, timepoint = NULL,
-  covv = NULL, cfactor = NULL, structure = "UN")
+bcmmrm(
+  outcome,
+  group,
+  data,
+  time = NULL,
+  id = NULL,
+  covv = NULL,
+  cfactor = NULL,
+  structure = "UN",
+  lmdint = c(-3, 3),
+  glabel = NULL,
+  tlabel = NULL
+)
 }
 \arguments{
-\item{outcome}{positive outcome (dependent) variable.}
+\item{outcome}{a name of positive outcome (dependent) variable included in
+\code{data}.}
 
-\item{group}{treatment group variable.}
+\item{group}{a name of treatment group variable included in \code{data}.}
 
-\item{data}{a data frame which includes outcome, group, time, id, and
-specified covariate variables.}
+\item{data}{a data frame which may include \code{outcome}, \code{group},
+\code{time}, \code{id}, and specified covariate variables.}
 
-\item{time}{time variable for repeated measurements.}
+\item{time}{a name of time variable for repeated measurements included
+in \code{data}. Default is \code{NULL}.}
 
-\item{id}{subject id variable for repeated measurements.}
+\item{id}{a name of subject id variable for repeated measurements included
+in \code{data}. Default is \code{NULL}.}
 
-\item{timepoint}{analysis time point.}
+\item{covv}{a character vector with names of covariate variables included
+in \code{data}. Default is \code{NULL}..}
 
-\item{covv}{covariate variables. default is NULL.}
+\item{cfactor}{an integer vector including nominal variable indicators for
+covariate variables. Nominal variable: \code{1}, continuous variable:
+\code{0}. Default is \code{NULL}.}
 
-\item{cfactor}{nominal variable indicator for covaraite variables. nominal
-variable: 1, continuous variable: 0. default is NULL.}
+\item{structure}{specify the covariance structure from \code{c("UN", "CS",
+"AR(1)")}. Default is \code{"UN"}.}
 
-\item{structure}{specify the covariance structure from c("UN", "CS",
-"AR(1)"). default is "UN"}
+\item{lmdint}{a vector containing the end-points of the interval to be
+searched for a transformation parameter. Default is \code{c(-3, 3)}.}
+
+\item{glabel}{a vector of length number of treatment groups containing
+the labels of \code{group} variable. Default is \code{NULL} and the
+levels of \code{group} variable in \code{data} are used.}
+
+\item{tlabel}{a vector of length number of repeated measures containing
+the labels of \code{time} variable. Default is \code{NULL} and the levels
+of \code{time} variable in \code{data} are used.}
 }
 \value{
-bcmmrm returns a list including following components for the model
-  median inference. \describe{
-    \item{\code{median}}{inrefence results for the model medians for all
-          groups.}
-    \item{\code{meddif.mod}}{model-based inference results for the model
-          median differences between all pairs of groups (group1 - group0).}
-    \item{\code{meddif.rob}}{robust inference results for the model median
-          differences between all pairs of groups (group1 - group0).}
-    \item{\code{meddif.mod.adj}}{model-based inference results for the model
-          median differences between all pairs of groups with the empirical
-          adjustment (group1 - group0).}
-    \item{\code{meddif.rob.adj}}{robust inference results for the model
-          median differences between all pairs of groups with the empirical
-          adjustment (group1 - group0).}
-    \item{\code{lambda}}{estimate of a transformation parameter.}
-    \item{\code{R}}{correlation matrix for any subject with no missing
-          values.}
-    \item{\code{betainf}}{inference results for beta under the assumption
-          that lambda is known.}
-    \item{\code{inf.marg}}{result of \code{\link{bcmarg}} function.}
-    \item{\code{outdata}}{data frame where the transformed outcome
-          (\code{ytr}) and the fitted value (\code{ytr.fitted}) on the
-          transformed scale are added to input data.}
-  }
+an object of class "\code{bcmmrm}" representing the results of model
+  median inference based on the Box-Cox transformed MMRM model.
+  Generic functions such as \code{print}, \code{plot}, and \code{summary}
+  have methods to show the results of the fit. See \code{\link{bcmmrmObject}}
+  for the components of the fit.
 }
 \description{
 \code{bcmmrm} provides inference results for the model median differences
 between treatment groups proposed by Maruo et al. (2017), which focuses on
 continuous and positive longitudinally observed outcomes and a situation
 where the efficacy of some treatments is compared based on a randomized,
-parallel group clinical trial. If time and id are not specified, inference
-results reduce to the results for the context of linear regression model
-proveded by Maruo et al. (2015).
+parallel group clinical trial. If \code{time} and \code{id} are not specified,
+inference results reduce to the results for the context of linear regression
+model provided by Maruo et al. (2015).
 }
 \note{
 If baseline observation for the outcome variable is available, Box-Cox
@@ -73,14 +79,27 @@ If baseline observation for the outcome variable is available, Box-Cox
 }
 \examples{
 data(aidscd4)
-# covariates: no covariate, covariance structure: CS structure
-bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, structure="CS")
 
-# covariate: Box-Cox transformed baseline (continuous variables),
+# Example 1-------------------------------------
+# covariates: no covariate, covariance structure: UN structure (default)
+
+# Fitting BCMMRM model
+bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
+       id = id)
+
+# Example 2-------------------------------------
+# covariate: Box-Cox transformed baseline (continuous) and sex (nominal),
 # covariance structure: AR(1) structure
-lmd.bl <- bcreg(cd4.bl ~ 1, aidscd4[aidscd4$weekc == 8, ])$lambda
-aidscd4$cd4.bl.tr <- (aidscd4$cd4.bl ^ lmd.bl - 1) / lmd.bl
-bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr"), c(0), structure = "AR(1)")
+
+# Box-Cox transformation for the baseline
+lmd.bl <- bcmarg(cd4.bl ~ 1, data = aidscd4[aidscd4$weekc == 8, ])$lambda
+aidscd4$cd4.bl.tr <- bct(aidscd4$cd4.bl, lmd.bl)
+
+# Fitting BCMMRM model
+bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
+       id = id, covv = c("cd4.bl.tr", "sex"), cfactor = c(0, 1),
+       structure = "AR(1)", glabel = c("Zid/Did", "Zid+Zal", "Zid+Did",
+       "Zid+Did+Nev"))
 
 }
 \references{
@@ -94,5 +113,5 @@ bcmmrm(cd4, treatment, aidscd4, weekc, id, 32, c("cd4.bl.tr"), c(0), structure =
 }
 }
 \seealso{
-\code{\link{bcmarg}}
+\code{\link{bcmarg}}, \code{\link{bcmmrmObject}}
 }
