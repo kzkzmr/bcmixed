@@ -9,35 +9,41 @@
 #' @param formula a two-sided linear formula object describing the model, with
 #'   the response on the left of a ~ operator and the terms, separated by +
 #'   operators, on the right.
-#' @param data a data frame in which to interpret the variables named in the
-#'   formula.
+#' @param data a data frame containing the variables used in the model.
 #' @param time time variable name for repeated measurements. Default is NULL.
 #' @param id subject id variable name for repeated measurements. Default is
 #'   NULL.
 #' @param structure specify the covariance structure from c("UN", "CS",
 #'   "AR(1)"). Default is "UN".
+#' @param lmdint a vector containing the end-points of the interval to be
+#'   searched for a transformation parameter. Default is c(-3, 3).
 #'
-#' @return bcmarg returns a list including following conponents for the
-#' marginal model parameter inference:
+#' @return an object of class "\code{bcmarg}". Objects of this class have
+#' methods for the generic functions  \code{coef}, \code{logLik},
+#' \code{print}, and \code{summary}. The object includes following conponents
+#' for the marginal model parameter inference:
 #' \describe{
-#'   \item{\code{lambda}}{estimate of a transformation parameter.}
-#'   \item{\code{beta}}{estimate of a regression parameter vector.}
-#'   \item{\code{alpha}}{estimate of a scale parameter vector.}
-#'   \item{\code{V}}{variace-covariance matrix for any subject with no missing
+#'   \item{\code{lambda}}{a numeric value of the estimate of the transformation
+#'         parameter.}
+#'   \item{\code{beta}}{a vector with the estimates of the regression
+#'         parameters.}
+#'   \item{\code{alpha}}{a vector with the estimates of the scale parameters.}
+#'   \item{\code{V}}{variance-covariance matrix for any subject with no missing
 #'         values.}
-#'   \item{\code{betainf}}{inference results for beta under the assumption
-#'         that lambda is known.}
+#'   \item{\code{betainf}}{a data frame containing the inference results for
+#'        \code{beta} under the assumption that lambda is known.}
 #'   \item{\code{Vtheta.mod}}{model-based variance-covariance matrix for MLE of
-#'         a vector of all parameters.}
+#'         the vector of all parameters: \code{c(lambda, beta, alpha)}.}
 #'   \item{\code{Vtheta.rob}}{robust variance-covariance matrix for MLE of
-#'         a vector of all parameters.}
-#'   \item{\code{lik}}{maximized liklihood.}
-#'   \item{\code{adj.prm}}{small-sample adjustment parameter used in
-#'         \code{\link{bcmmrm}}: c(number of subjects, number of
-#'         completed subjects, number of outcome observations, number of
-#'         missing observations).}
-#'   \item{\code{glsresult}}{results for \code{gls} (or \code{lm} when time
-#'         and id are not specified) function on the transformed scale. }
+#'         the vector of all parameters.}
+#'   \item{\code{logLik}}{a numeric value of the maximized likelihood.}
+#'   \item{\code{adj.prm}}{a vector with parameters used for the empirical
+#'         small sample adjustment in \code{\link{bcmmrm}}:
+#'         c(number of subjects, number of completed subjects, number of
+#'         outcome observations, number of missing observations).}
+#'   \item{\code{glsObject}}{an object of "\code{gls}" (or "\code{lm}" when
+#'         \code{time} and \code{id} are not specified) containing results of
+#'         \code{gls} (or \code{lm}) function on the transformed scale. }
 #' }
 #'
 #' @references \itemize{
@@ -49,11 +55,13 @@
 #'         \emph{Statistics in Medicine}, 36, 2420-2434.
 #' }
 #'
-#' @seealso \code{\link{bcmmrm}}
+#' @seealso \code{\link{bcmmrm}} \code{\link{gls}}
 #'
 #' @examples
 #'  data(aidscd4)
-#'  bcmarg(cd4 ~ as.factor(treatment), aidscd4, weekc, id, "AR(1)")
+#'  bcmarg(cd4 ~ as.factor(treatment) + as.factor(weekc) +
+#'         as.factor(treatment):as.factor(weekc),
+#'         data = aidscd4, time = weekc, id = id, structure = "AR(1)")
 #'
 #' @importFrom nlme gls glsControl corSymm varIdent corCompSymm corAR1
 #'             corMatrix
@@ -61,7 +69,9 @@
 #' @importFrom stats coef ftable model.matrix na.omit optimize xtabs
 #'
 #' @export
-bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
+bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
+                   lmdint = c(-3, 3)){
+  Call <- match.call()
   tr <- function(X) sum(diag(X))
   covcalcUN <- function(glsob, nt){
     flg <- 0
@@ -141,7 +151,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
     stop("outcome must be positive.")
   }
   if (deparse(substitute(time)) == "NULL" & deparse(substitute(id)) == "NULL"){
-    try1 <- try(bcreg(formula, data))
+    try1 <- bcreg(formula, data)
     nt <- 1
     data$id <- as.character(1:nrow(data))
     msflg <- table(data$id, is.na(data$y))[, 1]
@@ -181,326 +191,409 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN"){
     }
 
     if (nt == 1){
-      try1 <- try(bcreg(formula, data))
+      try1 <- bcreg(formula, data, lmdint)
     } else {
       formula2 <- formula(paste("z~", evars))
-      try1 <- try(optimize(likn, lower = -2, upper = 2, maximum = T,
-                           formula = formula2, data = data,
-                           structure = structure))
-      if (class(try1) != "try-error"){
-        if ((abs(try1$maximum) - 2) < 0.01){
-          try1 <- try(optimize(likn, lower = -3, upper = 3, maximum = T,
-                               formula = formula2, data = data,
-                               structure = structure))
-        }
-      }
+      try1 <- optimize(likn, interval = lmdint, maximum = T,
+                       formula = formula2, data = data, structure = structure)
     }
   }
-  if (class(try1) != "try-error"){
-    if (nt == 1){
-      le <- try1$lambda
-      beta <- try1$beta
-      alp <- try1$sigma ^ 2
-      V <- as.matrix(alp)
-      data$z <- (data$y ^ le - 1) / le
-      bcres <- try1$transformed
-      structure <- "UN"
-      lik <- try1$lik
-      RS <- try1$lmresult
-    } else {
-      le <- try1$maximum
-      lik <- try1$objective
 
-      data$z <- (data$y ^ le - 1) / le
+  if (nt == 1){
+    le <- try1$lambda
+    beta <- try1$beta
+    alp <- try1$sigma ^ 2
+    V <- as.matrix(alp)
+    data$z <- (data$y ^ le - 1) / le
+    bcres <- try1$betainf
+    structure <- "UN"
+    lik <- try1$logLik
+    RS <- try1$lmObject
+  } else {
+    le <- try1$maximum
+    lik <- try1$objective
 
+    data$z <- (data$y ^ le - 1) / le
+
+    if (structure == "UN"){
+      RS <- gls(model = formula2, data = data,
+                correlation = corSymm(form = ~ time | id),
+                weights = varIdent(form = ~ 1 | time), method = "ML",
+                control = glsControl(msMaxIter = 100), na.action = na.omit)
+      V <- covcalcUN(RS, nt)
+      alp <- c()
+      nmalp <- c()
+      for (i in 1:nt){
+        for (j in i:nt){
+          alp <- c(alp, V[i, j])
+          nmalp <- c(nmalp, paste("UN(", i, ",", j, ")", sep = ""))
+        }
+        names(alp) <- nmalp
+      }
+    }
+    if (structure == "CS"){
+      RS <- gls(model = formula2, data = data,
+                correlation = corCompSymm(form = ~ time | id),
+                method = "ML", control = glsControl(msMaxIter = 100),
+                na.action = na.omit)
+      V <- covcalcCSAR(RS, nt)
+      alp <- c( V[1, 2], V[1, 1] - V[1, 2])
+      names(alp) <- c("ID", "Residual")
+    }
+    if (structure == "AR(1)"){
+      RS <- gls(model = formula2, data = data,
+                correlation = corAR1(form = ~ time | id),
+                method = "ML", control = glsControl(msMaxIter = 100),
+                na.action = na.omit)
+      V <- covcalcCSAR(RS, nt)
+      alp <- c(V[1, 1], V[1, 2] / V[1, 1])
+      names(alp) <- c("Variance", "Correlation")
+    }
+    beta <- RS$coefficients
+    bcres <- summary(RS)$tTable
+    time.tbl <- sort(unique(data[, deparse(substitute(time))]))
+    rownames(V) <- time.tbl
+    colnames(V) <- time.tbl
+  }
+  ns <- length(alp)
+  msflg <- table(data$id, is.na(data$y))[, 1]
+  N <- sum(msflg != 0)
+  omis <- names(msflg)[msflg == 0]
+  idt <- cbind((1:N) %x% (numeric(nt) + 1), (numeric(N) + 1) %x% (1:nt))
+
+  if (length(omis) > 0L){
+    for (i in 1:length(omis)){
+      data <- data[data$id != omis[i], ]
+    }
+  }
+  Ncc <- sum(msflg == nt)
+  flg.na <- !is.na(data$y)
+  n.data <- sum(flg.na)
+  X <- model.matrix(formula, data = data)
+  y <- data$y[flg.na]
+  z <- data$z[flg.na]
+  n.na <- length(flg.na) - n.data
+  adj.prm <- c(N, Ncc, n.data, n.na)
+  nb <- length(beta)
+  Xb <- list()
+  idt <- cbind((1:N) %x% (numeric(nt) + 1), (numeric(N) + 1) %x% (1:nt))
+  for (j in 1:nb){
+    dum <- as.data.frame(cbind(idt, X[, j]))
+    names(dum) <- c("a", "b", "c")
+    Xb[[j]] <- as.matrix(ftable(xtabs(c ~ ., dum)))
+  }
+  dimnames(X) <- NULL
+  nti <- table(data$id[!is.na(data$y)])
+  ntic <- cumsum(nti)
+  ntic <- c(0, ntic)
+  Xflg <- (1:N) %x% (numeric(nt) + 1)
+  X <- X[flg.na, ]
+  Xflg <- Xflg[flg.na]
+  ly <- log(y)
+  dz <- le ^ (-2) * (y ^ le * (le * ly - 1) + 1)
+  ddz <- le ^ (-1) * y ^ le * ly ^ 2 - 2 * le ^ (-2) * y ^ le * ly +
+    2 * le ^ (-3) * (y ^ le - 1)
+  if (!is.matrix(X)){
+    X <- as.matrix(X)
+  }
+  re <- z - X %*% beta
+  dum <- as.data.frame(cbind(idt[flg.na, ], re))
+  names(dum) <- c("a", "b", "c")
+  rt <- as.matrix(xtabs(c ~ ., dum))
+  dum <- as.data.frame(cbind(idt[flg.na, ], dz))
+  names(dum) <- c("a", "b", "c")
+  dzt <- as.matrix(xtabs(c ~ ., dum))
+  dum <- as.data.frame(cbind(idt[flg.na, ], ddz))
+  names(dum) <- c("a", "b", "c")
+  ddzt <- as.matrix(xtabs(c ~ ., dum))
+  dum <- as.data.frame(cbind(idt[flg.na, ], ly))
+  names(dum) <- c("a", "b", "c")
+  lyt <- as.matrix(xtabs(c ~ ., dum))
+  lysum <- rowSums(lyt)
+  dp <- numeric(N)
+  t2 <- 2 ^ nt - 1
+  nsf <- c()
+  for (j1 in 1:nt){
+    for (j2 in j1:nt){
+      nsf <- rbind(nsf, t(c(j1, j2)))
+    }
+  }
+  colf <- list()
+  for (j in 1:(t2)){
+    mv <- dec2bin(j - 1, nt)
+    aprt <- as.matrix(apply(rt == 0, 1, "==", mv))
+    if (t2 == 1) {
+      aprt <- t(aprt)
+    }
+    dp[colSums(aprt) == nt] <- j
+    colf[[j]] <- (1:nt)[mv == 0]
+  }
+  ndp <- numeric(t2)
+  dpf <- list()
+  for (j in 1:t2) {
+    ndp[j] <- sum(dp == j)
+    dpf[[j]] <- (dp == j)
+  }
+  Hl <- 0
+  Jl <- 0
+  Hb <- matrix(0, nb, nb)
+  Hs <- matrix(0, ns, ns)
+  Hlb <- matrix(0, 1, nb)
+  Hls <- matrix(0, 1, ns)
+  Hbs <- matrix(0, nb, ns)
+  Jb <- matrix(0, nb, nb)
+  Js <- matrix(0, ns, ns)
+  Jlb <- matrix(0, 1, nb)
+  Jls <- matrix(0, 1, ns)
+  Jbs <- matrix(0, nb, ns)
+  for  (j in 1:t2){
+    if (ndp[j] != 0){
+      rj <- rt[dp == j, colf[[j]], drop = F]
+      nj <- nrow(rj)
+      lysj <- lysum[dp == j]
+      S <- V[colf[[j]], colf[[j]], drop = F]
+      nSj <- nrow(S)
+      cholS <- chol(S)
+      mat0 <- matrix(0, nSj, nSj)
+      dS <- list()
+      dS2 <- list()
       if (structure == "UN"){
-        RS <- gls(model = formula2, data = data,
-                  correlation = corSymm(form = ~ time | id),
-                  weights = varIdent(form = ~ 1 | time), method = "ML",
-                  control = glsControl(msMaxIter = 100), na.action = na.omit)
-        V <- covcalcUN(RS, nt)
-        alp <- c()
-        for (i in 1:nt){
-          for (j in i:nt){
-            alp <- c(alp, V[i, j])
+        for (j1 in 1:ns){
+          dS[[j1]] <- 1 * (S == alp[j1])
+          dS2[[j1]] <- list()
+          for (j2 in 1 : ns){
+            dS2[[j1]][[j2]] <- mat0
           }
         }
       }
       if (structure == "CS"){
-        RS <- gls(model = formula2, data = data,
-                  correlation = corCompSymm(form = ~ time | id),
-                  method = "ML", control = glsControl(msMaxIter = 100),
-                  na.action = na.omit)
-        V <- covcalcCSAR(RS, nt)
-        alp <- c(V[1, 1] - V[1, 2], V[1, 2])
+        dS[[1]] <- diag(nSj)
+        dS[[2]] <- matrix(1, nSj, nSj)
+        for (j1 in 1:2){
+          dS2[[j1]] <- list()
+          for (j2 in 1:2){
+            dS2[[j1]][[j2]] <- mat0
+          }
+        }
       }
       if (structure == "AR(1)"){
-        RS <- gls(model = formula2, data = data,
-                  correlation = corAR1(form = ~ time | id),
-                  method = "ML", control = glsControl(msMaxIter = 100),
-                  na.action = na.omit)
-        V <- covcalcCSAR(RS, nt)
-        alp <- c(V[1, 1], V[1, 2] / V[1, 1])
-      }
-      beta <- as.numeric(RS$coefficients)
-      bcres <- summary(RS)$tTable
-    }
-    ns <- length(alp)
-    msflg <- table(data$id, is.na(data$y))[, 1]
-    N <- sum(msflg != 0)
-    omis <- names(msflg)[msflg == 0]
-    table(data$id)
-    idt <- cbind((1:N) %x% (numeric(nt) + 1), (numeric(N) + 1) %x% (1:nt))
-
-    if (length(omis) > 0L){
-      for (i in 1:length(omis)){
-        data <- data[data$id != omis[i], ]
-      }
-    }
-    Ncc <- sum(msflg == nt)
-    flg.na <- !is.na(data$y)
-    n.data <- sum(flg.na)
-    X <- model.matrix(formula, data = data)
-    y <- data$y[flg.na]
-    z <- data$z[flg.na]
-    n.na <- length(flg.na) - n.data
-    adj.prm <- c(N, Ncc, n.data, n.na)
-    nb <- length(beta)
-    Xb <- list()
-    idt <- cbind((1:N) %x% (numeric(nt) + 1), (numeric(N) + 1) %x% (1:nt))
-    for (j in 1:nb){
-      dum <- as.data.frame(cbind(idt, X[, j]))
-      names(dum) <- c("a", "b", "c")
-      Xb[[j]] <- as.matrix(ftable(xtabs(c ~ ., dum)))
-    }
-    dimnames(X) <- NULL
-    nti <- table(data$id[!is.na(data$y)])
-    ntic <- cumsum(nti)
-    ntic <- c(0, ntic)
-    Xflg <- (1:N) %x% (numeric(nt) + 1)
-    X <- X[flg.na, ]
-    Xflg <- Xflg[flg.na]
-    ly <- log(y)
-    dz <- le ^ (-2) * (y ^ le * (le * ly - 1) + 1)
-    ddz <- le ^ (-1) * y ^ le * ly ^ 2 - 2 * le ^ (-2) * y ^ le * ly +
-      2 * le ^ (-3) * (y ^ le - 1)
-    re <- z - X %*% beta
-    dum <- as.data.frame(cbind(idt[flg.na, ], re))
-    names(dum) <- c("a", "b", "c")
-    rt <- as.matrix(xtabs(c ~ ., dum))
-    dum <- as.data.frame(cbind(idt[flg.na, ], dz))
-    names(dum) <- c("a", "b", "c")
-    dzt <- as.matrix(xtabs(c ~ ., dum))
-    dum <- as.data.frame(cbind(idt[flg.na, ], ddz))
-    names(dum) <- c("a", "b", "c")
-    ddzt <- as.matrix(xtabs(c ~ ., dum))
-    dum <- as.data.frame(cbind(idt[flg.na, ], ly))
-    names(dum) <- c("a", "b", "c")
-    lyt <- as.matrix(xtabs(c ~ ., dum))
-    lysum <- rowSums(lyt)
-    dp <- numeric(N)
-    t2 <- 2 ^ nt - 1
-    nsf <- c()
-    for (j1 in 1:nt){
-      for (j2 in j1:nt){
-        nsf <- rbind(nsf, t(c(j1, j2)))
-      }
-    }
-    colf <- list()
-    for (j in 1:(t2)){
-      mv <- dec2bin(j - 1, nt)
-      aprt <- as.matrix(apply(rt == 0, 1, "==", mv))
-      if (t2 == 1) {
-        aprt <- t(aprt)
-      }
-      dp[colSums(aprt) == nt] <- j
-      colf[[j]] <- (1:nt)[mv == 0]
-    }
-    ndp <- numeric(t2)
-    dpf <- list()
-    for (j in 1:t2) {
-      ndp[j] <- sum(dp == j)
-      dpf[[j]] <- (dp == j)
-    }
-    Hl <- 0
-    Jl <- 0
-    Hb <- matrix(0, nb, nb)
-    Hs <- matrix(0, ns, ns)
-    Hlb <- matrix(0, 1, nb)
-    Hls <- matrix(0, 1, ns)
-    Hbs <- matrix(0, nb, ns)
-    Jb <- matrix(0, nb, nb)
-    Js <- matrix(0, ns, ns)
-    Jlb <- matrix(0, 1, nb)
-    Jls <- matrix(0, 1, ns)
-    Jbs <- matrix(0, nb, ns)
-    for  (j in 1:t2){
-      if (ndp[j] != 0){
-        rj <- rt[dp == j, colf[[j]], drop = F]
-        nj <- nrow(rj)
-        lysj <- lysum[dp == j]
-        S <- V[colf[[j]], colf[[j]], drop = F]
-        nSj <- nrow(S)
-        cholS <- chol(S)
-        mat0 <- matrix(0, nSj, nSj)
-        dS <- list()
-        dS2 <- list()
-        if (structure == "UN"){
-          for (j1 in 1:ns){
-            dS[[j1]] <- 1 * (S == alp[j1])
-            dS2[[j1]] <- list()
-            for (j2 in 1 : ns){
-              dS2[[j1]][[j2]] <- mat0
-            }
+        dS[[1]] <- S / S[1, 1]
+        dS[[2]] <- mat0
+        for (j1 in 1:2){
+          dS2[[j1]] <- list()
+          for (j2 in 1:2){
+            dS2[[j1]][[j2]] <- mat0
           }
         }
-        if (structure == "CS"){
-          dS[[1]] <- diag(nSj)
-          dS[[2]] <- matrix(1, nSj, nSj)
-          for (j1 in 1:2){
-            dS2[[j1]] <- list()
-            for (j2 in 1:2){
-              dS2[[j1]][[j2]] <- mat0
-            }
-          }
-        }
-        if (structure == "AR(1)"){
-          dS[[1]] <- S / S[1, 1]
-          dS[[2]] <- mat0
-          for (j1 in 1:2){
-            dS2[[j1]] <- list()
-            for (j2 in 1:2){
-              dS2[[j1]][[j2]] <- mat0
-            }
-          }
-          for (j1 in 1:nSj){
-            for (j2 in 1:nSj){
-              rp <- abs(j1 - j2)
-              dS[[2]][j1, j2] <- rp * alp[1] * alp[2] ^ (rp - 1)
-              dS2[[1]][[2]][j1, j2] <- rp * alp[2] ^ (rp - 1)
-              dS2[[2]][[1]][j1, j2] <- rp * alp[2] ^ (rp - 1)
-              dS2[[2]][[2]][j1, j2] <- rp * (rp - 1) * alp[1] *
-                alp[2] ^ (rp - 2)
-            }
-          }
-        }
-        iS <- solve(S)
-        sSr <- backsolve(cholS, t(rj), transpose = T)
-        sxb <- list()
-        sdz <- list()
-        sddz <- list()
-        xjb <- list()
-        cs_xSr <- list()
-        dzj <- dzt[dp == j, colf[[j]], drop = F]
-        ddzj <- ddzt[dp == j, colf[[j]], drop = F]
-        sdz <- backsolve(cholS, t(dzj), transpose = T)
-        sddz <- backsolve(cholS, t(ddzj), transpose = T)
-        cs_zSr <- colSums(sdz * sSr)
-        for (jb in 1:nb){
-          xj <- Xb[[jb]][dp == j, colf[[j]], drop = F]
-          xjb[[jb]] <- xj
-          sxb0 <- backsolve(cholS, t(xj), transpose = T)
-          sxb[[jb]] <- sxb0
-          cs_xSr[[jb]] <- colSums(sxb0 * sSr)
-        }
-        qAr <- list()
-        cs_rAr <- list()
-        rAA <- list()
-        AA <- list()
-        tris <- numeric(ns)
-        for (js in 1:ns){
-          j1 <- nsf[js, 1]
-          j2 <- nsf[js, 2]
-          if (sum(colf[[j]] == j1) == 1 & sum(colf[[j]] == j2) == 1){
-            AA0 <- -iS %*% dS[[js]] %*% iS
-            qr0 <- qr(AA0)
-            AA[[js]] <- AA0
-            rAA[[js]] <- qr.R(qr0)
-            qx0 <- t(qr.Q(qr0)) %*% t(rj)
-            rx0 <- qr.R(qr0) %*% t(rj)
-            tris[js] <- tr(iS %*% dS[[js]])
-            qAr[[js]] <- qx0
-            cs_rAr[[js]] <- colSums(qx0 * rx0)
-          } else {
-            qAr[[js]] <- NA
-          }
-        }
-        Hl <- Hl - sum(sddz * sSr) - sum(sdz ^ 2)
-        Jl <- Jl + sum(lysj ^ 2) + sum(cs_zSr ^ 2) - 2 * sum(lysj * cs_zSr)
-        for (j1 in 1:nb){
-          for (j2 in j1:nb){
-            if (!is.na(sxb[[j1]][1]) & !is.na(sxb[[j2]][1])){
-              Hb[j1, j2] <- Hb[j1, j2] - sum(sxb[[j1]] * sxb[[j2]])
-              Jb[j1, j2] <- Jb[j1, j2] + sum(cs_xSr[[j1]] * cs_xSr[[j2]])
-            }
-          }
-        }
-        for (j1 in 1:ns){
-          for (j2 in j1:ns){
-            if (!is.na(qAr[[j1]][1]) & !is.na(qAr[[j2]][1])){
-              AA2 <- iS %*% (2 * dS[[j1]] %*% iS %*% dS[[j2]] -
-                               dS2[[j1]][[j2]]) %*% iS
-              qr0 <- qr(AA2)
-              qx0 <- t(qr.Q(qr0)) %*% t(rj)
-              rx0 <- qr.R(qr0) %*% t(rj)
-              Hs[j1, j2] <- Hs[j1, j2] - 0.5 * nj *
-                tr(AA[[j1]] %*% dS[[j2]] + iS %*% dS2[[j1]][[j2]]) -
-                0.5 * sum(qx0 * rx0)
-              Js[j1, j2] <- Js[j1, j2] + 0.25 * nj * tris[j1] * tris[j2] +
-                0.25 * sum(cs_rAr[[j1]] * cs_rAr[[j2]]) +
-                0.25 * sum(tris[j1] * cs_rAr[[j2]]) +
-                0.25 * sum(tris[j2] * cs_rAr[[j1]])
-            }
-          }
-        }
-        for (j2 in 1:nb){
-          Hlb[1, j2] <- Hlb[1, j2] + sum(sdz * sxb[[j2]])
-          Jlb[1, j2] <- Jlb[1, j2] + sum(lysj * cs_xSr[[j2]]) -
-            sum(cs_zSr * cs_xSr[[j2]])
-        }
-        for (j2 in 1:ns){
-          if (!is.na(qAr[[j2]][1])){
-            dzrA <- rAA[[j2]] %*% t(dzj)
-            Hls[1, j2] <- Hls[1, j2] - sum(dzrA * qAr[[j2]])
-            Jls[1, j2] <- Jls[1, j2] - 0.5 * sum(lysj * tris[j2]) -
-              0.5 * sum(lysj * cs_rAr[[j2]]) +
-              0.5 * sum(cs_zSr * tris[j2]) + 0.5 * sum(cs_zSr * cs_rAr[[j2]])
-          }
-        }
-        for (j1 in 1:nb){
-          for (j2 in 1:ns){
-            if (!is.na(qAr[[j2]][1])){
-              xrA <- rAA[[j2]] %*% t(xjb[[j1]])
-              Hbs[j1, j2] <- Hbs[j1, j2] + sum(xrA * qAr[[j2]])
-              Jbs[j1, j2] <- Jbs[j1, j2] -
-                0.5 * sum(tris[[j2]] * cs_xSr[[j1]]) -
-                0.5 * sum(cs_xSr[[j1]] * cs_rAr[[j2]])
-            }
+        for (j1 in 1:nSj){
+          for (j2 in 1:nSj){
+            rp <- abs(j1 - j2)
+            dS[[2]][j1, j2] <- rp * alp[1] * alp[2] ^ (rp - 1)
+            dS2[[1]][[2]][j1, j2] <- rp * alp[2] ^ (rp - 1)
+            dS2[[2]][[1]][j1, j2] <- rp * alp[2] ^ (rp - 1)
+            dS2[[2]][[2]][j1, j2] <- rp * (rp - 1) * alp[1] *
+              alp[2] ^ (rp - 2)
           }
         }
       }
+      iS <- solve(S)
+      sSr <- backsolve(cholS, t(rj), transpose = T)
+      sxb <- list()
+      sdz <- list()
+      sddz <- list()
+      xjb <- list()
+      cs_xSr <- list()
+      dzj <- dzt[dp == j, colf[[j]], drop = F]
+      ddzj <- ddzt[dp == j, colf[[j]], drop = F]
+      sdz <- backsolve(cholS, t(dzj), transpose = T)
+      sddz <- backsolve(cholS, t(ddzj), transpose = T)
+      cs_zSr <- colSums(sdz * sSr)
+      for (jb in 1:nb){
+        xj <- Xb[[jb]][dp == j, colf[[j]], drop = F]
+        xjb[[jb]] <- xj
+        sxb0 <- backsolve(cholS, t(xj), transpose = T)
+        sxb[[jb]] <- sxb0
+        cs_xSr[[jb]] <- colSums(sxb0 * sSr)
+      }
+      qAr <- list()
+      cs_rAr <- list()
+      rAA <- list()
+      AA <- list()
+      tris <- numeric(ns)
+      for (js in 1:ns){
+        j1 <- nsf[js, 1]
+        j2 <- nsf[js, 2]
+        if (sum(colf[[j]] == j1) == 1 & sum(colf[[j]] == j2) == 1){
+          AA0 <- -iS %*% dS[[js]] %*% iS
+          qr0 <- qr(AA0)
+          AA[[js]] <- AA0
+          rAA[[js]] <- qr.R(qr0)
+          qx0 <- t(qr.Q(qr0)) %*% t(rj)
+          rx0 <- qr.R(qr0) %*% t(rj)
+          tris[js] <- tr(iS %*% dS[[js]])
+          qAr[[js]] <- qx0
+          cs_rAr[[js]] <- colSums(qx0 * rx0)
+        } else {
+          qAr[[js]] <- NA
+        }
+      }
+      Hl <- Hl - sum(sddz * sSr) - sum(sdz ^ 2)
+      Jl <- Jl + sum(lysj ^ 2) + sum(cs_zSr ^ 2) - 2 * sum(lysj * cs_zSr)
       for (j1 in 1:nb){
-        for (j2 in 1:j1){
-          Hb[j1, j2] <- Hb[j2, j1]
-          Jb[j1, j2] <- Jb[j2, j1]
+        for (j2 in j1:nb){
+          if (!is.na(sxb[[j1]][1]) & !is.na(sxb[[j2]][1])){
+            Hb[j1, j2] <- Hb[j1, j2] - sum(sxb[[j1]] * sxb[[j2]])
+            Jb[j1, j2] <- Jb[j1, j2] + sum(cs_xSr[[j1]] * cs_xSr[[j2]])
+          }
         }
       }
       for (j1 in 1:ns){
-        for (j2 in 1:j1){
-          Hs[j1, j2] <- Hs[j2, j1]
-          Js[j1, j2] <- Js[j2, j1]
+        for (j2 in j1:ns){
+          if (!is.na(qAr[[j1]][1]) & !is.na(qAr[[j2]][1])){
+            AA2 <- iS %*% (2 * dS[[j1]] %*% iS %*% dS[[j2]] -
+                             dS2[[j1]][[j2]]) %*% iS
+            qr0 <- qr(AA2)
+            qx0 <- t(qr.Q(qr0)) %*% t(rj)
+            rx0 <- qr.R(qr0) %*% t(rj)
+            Hs[j1, j2] <- Hs[j1, j2] - 0.5 * nj *
+              tr(AA[[j1]] %*% dS[[j2]] + iS %*% dS2[[j1]][[j2]]) -
+              0.5 * sum(qx0 * rx0)
+            Js[j1, j2] <- Js[j1, j2] + 0.25 * nj * tris[j1] * tris[j2] +
+              0.25 * sum(cs_rAr[[j1]] * cs_rAr[[j2]]) +
+              0.25 * sum(tris[j1] * cs_rAr[[j2]]) +
+              0.25 * sum(tris[j2] * cs_rAr[[j1]])
+          }
+        }
+      }
+      for (j2 in 1:nb){
+        Hlb[1, j2] <- Hlb[1, j2] + sum(sdz * sxb[[j2]])
+        Jlb[1, j2] <- Jlb[1, j2] + sum(lysj * cs_xSr[[j2]]) -
+          sum(cs_zSr * cs_xSr[[j2]])
+      }
+      for (j2 in 1:ns){
+        if (!is.na(qAr[[j2]][1])){
+          dzrA <- rAA[[j2]] %*% t(dzj)
+          Hls[1, j2] <- Hls[1, j2] - sum(dzrA * qAr[[j2]])
+          Jls[1, j2] <- Jls[1, j2] - 0.5 * sum(lysj * tris[j2]) -
+            0.5 * sum(lysj * cs_rAr[[j2]]) +
+            0.5 * sum(cs_zSr * tris[j2]) + 0.5 * sum(cs_zSr * cs_rAr[[j2]])
+        }
+      }
+      for (j1 in 1:nb){
+        for (j2 in 1:ns){
+          if (!is.na(qAr[[j2]][1])){
+            xrA <- rAA[[j2]] %*% t(xjb[[j1]])
+            Hbs[j1, j2] <- Hbs[j1, j2] + sum(xrA * qAr[[j2]])
+            Jbs[j1, j2] <- Jbs[j1, j2] -
+              0.5 * sum(tris[[j2]] * cs_xSr[[j1]]) -
+              0.5 * sum(cs_xSr[[j1]] * cs_rAr[[j2]])
+          }
         }
       }
     }
-    H <- rbind(cbind(Hl, Hlb, Hls), cbind(t(Hlb), Hb, Hbs),
-               cbind(t(Hls), t(Hbs), Hs))
-    J <- rbind(cbind(Jl, Jlb, Jls), cbind(t(Jlb), Jb, Jbs),
-               cbind(t(Jls), t(Jbs), Js))
-    iII <- ginv(-H)
-    iIIr <- iII %*% J %*% iII
-    res <- list(lambda = le, beta = beta, alpha = alp, V = V,
-                betainf = bcres, Vtheta.mod = iII, Vtheta.rob = iIIr,
-                lik = lik, adj.prm = adj.prm, glsresult = RS)
-    return(res)
+    for (j1 in 1:nb){
+      for (j2 in 1:j1){
+        Hb[j1, j2] <- Hb[j2, j1]
+        Jb[j1, j2] <- Jb[j2, j1]
+      }
+    }
+    for (j1 in 1:ns){
+      for (j2 in 1:j1){
+        Hs[j1, j2] <- Hs[j2, j1]
+        Js[j1, j2] <- Js[j2, j1]
+      }
+    }
   }
+  H <- rbind(cbind(Hl, Hlb, Hls), cbind(t(Hlb), Hb, Hbs),
+             cbind(t(Hls), t(Hbs), Hs))
+  J <- rbind(cbind(Jl, Jlb, Jls), cbind(t(Jlb), Jb, Jbs),
+             cbind(t(Jls), t(Jbs), Js))
+  iII <- ginv(-H)
+  iIIr <- iII %*% J %*% iII
+  structure(class = "bcmarg",
+            list(call = Call, formula = formula, lambda = le, beta = beta,
+                 alpha = alp, V = V, betainf = bcres, Vtheta.mod = iII,
+                 Vtheta.rob = iIIr, logLik = lik, adj.prm = adj.prm,
+                 glsObject = RS))
 }
+
+#' @export
+logLik.bcmarg <- function (object, REML = F, ...){
+  if (REML) {
+    stop ("REML method can not be used in bcmmrm.")
+  }
+  structure(object$logLik,
+            df = 1 + length(c(object$beta, object$alpha)),
+            class = "logLik")
+}
+
+#' @export
+coef.bcmarg <- function (object, ...){
+  coef(object$glsObject)
+}
+
+
+#' @export
+print.bcmarg <-
+  function(x, digits = 3, ...)
+  {
+    mCall <- x$call
+    covstr <- mCall$structure
+    if (is.null(covstr) & !is.null(mCall$id)){
+      covstr <- "UN"
+    }
+    cat("Box-Cox transformed mixed model analysis\n")
+    cat("  Formula:", deparse(x$formula), "\n")
+    cat("  Time:", deparse(mCall$time), "\n")
+    cat("  ID:", deparse(mCall$id), "\n")
+    cat("  Covariance structure:", deparse(covstr), "\n")
+    cat("  Data:", deparse( mCall$data ), "\n")
+    cat("  Estimated transformation parameter: ",
+        format(x$lambda, digit = digits), "\n")
+    cat("  Log-likelihood: ", format(x$logLik), "\n", sep = "")
+    cat("\nCoefficients:\n")
+    print(x$beta, digit = digits)
+    invisible(x)
+  }
+
+#' @export
+summary.bcmarg <- function(object, ...) {
+  structure(class = "summary.bcmarg", object)
+}
+
+#' @export
+print.summary.bcmarg <-
+  function(x, digits = 3, ...)
+  {
+    mCall <- x$call
+    covstr <- mCall$structure
+    if (is.null(covstr) & !is.null(mCall$id)){
+      covstr <- "UN"
+    }
+    V <- x$V
+    Sd <- sqrt(diag(V))
+    R <- V / (Sd %*% t(Sd))
+    betainf <- x$betainf
+    betainf[, 4] <- round(betainf[, 4], digits = digits)
+
+    cat("Box-Cox transformed mixed model analysis\n")
+    cat("  Formula:", deparse(x$formula), "\n")
+    cat("  Time:", deparse(mCall$time), "\n")
+    cat("  ID:", deparse(mCall$id), "\n")
+    cat("  Covariance structure:", deparse(covstr), "\n")
+    cat("  Data:", deparse( mCall$data ), "\n")
+    cat("  Log-likelihood: ", format(x$logLik), "\n", sep = "")
+    cat("  Estimated transformation parameter: ",
+        format(x$lambda, digits = digits), "\n")
+    cat("\nCoefficients on the transformed scale:\n")
+    print(betainf, digits = digits)
+    cat("\n *NOTE* : Inference results under the assumption that \n")
+    cat("          transformation parameter is known are provided.\n")
+    cat("          Although statistical test would be asymptotically\n")
+    cat("          valid, standard error might be underestimated.\n")
+    cat("\nCovariance parameters on the transformed scale:\n")
+    print(x$alp, digits = digits)
+    cat("\nCorrelations on the transformed scale:\n")
+    print(R, digits = digits)
+    invisible(x)
+  }

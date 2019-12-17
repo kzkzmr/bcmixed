@@ -9,22 +9,29 @@
 #'   operators, on the right.
 #' @param data a data frame in which to interpret the variables named in the
 #'   formula.
+#' @param lmdint a vector containing the end-points of the interval to be
+#'   searched for a transformation parameter. Default is c(-3, 3).
 #'
 #' @return LmeMargBc returns a list including following conponents:
 #' \describe{
-#'   \item{\code{lambda}}{estimate of a transformation parameter.}
-#'   \item{\code{beta}}{estimate of a regression parameter vector.}
-#'   \item{\code{sigma}}{estimate of a scale parameter.}
-#'   \item{\code{betainf}}{inference results for beta under the
-#'         assumption that lambda is known.}
-#'   \item{\code{lik}}{maximized liklihood.}
-#'   \item{\code{lmresult}}{results of \code{lm} function on the
-#'         transformed scale}
+#'   \item{\code{lambda}}{a numeric value with the estimate of
+#'         the transformation parameter.}
+#'   \item{\code{beta}}{a vector with the estimates of the regression
+#'         parameters.}
+#'   \item{\code{sigma}}{a numeric value with the estimate of the scale
+#'         parameter.}
+#'   \item{\code{betainf}}{a data frame with inference results for \code{beta}
+#'         under the assumption that \code{lambda} is known.}
+#'   \item{\code{lik}}{a numeric value with the maximized liklihood.}
+#'   \item{\code{lmObject}}{an object of "\code{lm}" containing the results of
+#'         \code{lm} function on the transformed scale}
 #' }
 #'
 #' @references Box, G.E.P. and Cox, D.R. (1964). An analysis of transformations
 #' (with discussion). Journals of the Royal Statistical Society, Series B, 26,
 #' 211-246.
+#'
+#' @seealso \code{\link{lm}}
 #'
 #' @examples
 #'   data(aidscd4)
@@ -35,7 +42,7 @@
 #' @importFrom stats lm model.matrix optimize
 #'
 #' @export
-bcreg <- function(formula, data){
+bcreg <- function(formula, data, lmdint = c(-3, 3)){
   formula <- formula(formula)
   data <- as.data.frame(data)
   y <- data[, as.character(formula)[2]]
@@ -61,7 +68,7 @@ bcreg <- function(formula, data){
     lik <- -n / 2 * (log(2 * pi) + 1) - n * log(sgm) + (l - 1) * sum(log(y))
     return(lik)
   }
-  res <- optimize(lbc, c(-3, 3), y = y, X = X, maximum = T)
+  res <- optimize(lbc, interval = lmdint, maximum = T, y = y, X = X)
   lmd <- res$maximum
   z <- (y ^ lmd - 1) / lmd
   beta <- ginv(t(X) %*% X) %*% t(X) %*% z
@@ -73,8 +80,7 @@ bcreg <- function(formula, data){
   evars <- as.character(formula)[3]
   formula2 <- formula(paste("z~", evars))
   lmres <- lm(formula2, data)
-  bcres <- summary(lmres)$coefficients
-  res <- list(lambda = lmd, beta = as.numeric(beta), sigma = sgm,
-              betainf = bcres, lik = lik, lmresult = lmres)
-  return(res)
+  bcres <- as.data.frame(summary(lmres)$coefficients)
+  list(lambda = lmd, beta = as.numeric(beta), sigma = sgm,
+            betainf = bcres, logLik = lik, lmObject= lmres)
 }
