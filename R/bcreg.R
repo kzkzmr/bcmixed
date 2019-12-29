@@ -42,23 +42,23 @@
 #' @importFrom stats lm model.matrix optimize
 #'
 #' @export
-bcreg <- function(formula, data, lmdint = c(-3, 3)){
+bcreg <- function(formula, data, lmdint = c(-3, 3)) {
   formula <- formula(formula)
   data <- as.data.frame(data)
   y <- data[, as.character(formula)[2]]
-  if (sum(y < 0, na.rm = T) > 0L){
+  if (sum(y < 0, na.rm = T) > 0L) {
     stop("outcome must be positive.")
   }
   options(na.action = "na.pass")
   X <- model.matrix(formula, data = data)
-  if (sum(is.na(X)) > 0L){
+  if (sum(is.na(X)) > 0L) {
     stop("There are missing values in explanatory variables.")
   }
   flg.na <- !is.na(y)
   y <- y[flg.na]
   X <- X[flg.na, ]
   n <- length(y)
-  lbc <- function(l, y, X){
+  lbc <- function(l, y, X) {
     if (l == 0) z <- log(y)
     else z <- (y ^ l - 1) / l
     n <- length(y)
@@ -82,5 +82,5 @@ bcreg <- function(formula, data, lmdint = c(-3, 3)){
   lmres <- lm(formula2, data)
   bcres <- as.data.frame(summary(lmres)$coefficients)
   list(lambda = lmd, beta = as.numeric(beta), sigma = sgm,
-            betainf = bcres, logLik = lik, lmObject= lmres)
+            betainf = bcres, logLik = lik, lmObject = lmres)
 }

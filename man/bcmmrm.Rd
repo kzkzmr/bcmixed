@@ -66,9 +66,9 @@ an object of class "\code{bcmmrm}" representing the results of model
 between treatment groups proposed by Maruo et al. (2017), which focuses on
 continuous and positive longitudinally observed outcomes and a situation
 where the efficacy of some treatments is compared based on a randomized,
-parallel group clinical trial. If \code{time} and \code{id} are not specified,
-inference results reduce to the results for the context of linear regression
-model provided by Maruo et al. (2015).
+parallel group clinical trial. If \code{time} and \code{id} are not
+specified, inference results reduce to the results for the context of
+linear regression model provided by Maruo et al. (2015).
 }
 \note{
 If baseline observation for the outcome variable is available, Box-Cox

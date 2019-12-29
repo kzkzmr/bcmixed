@@ -43,4 +43,3 @@
 #'
 #' @seealso \code{\link{bcmmrm}}
 NULL
-

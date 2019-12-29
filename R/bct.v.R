@@ -24,7 +24,7 @@
 #'   bct.v(y)
 #'
 #' @export
-bct.v <- function(y, lmdint = c(-3, 3)){
+bct.v <- function(y, lmdint = c(-3, 3)) {
   if (!is.numeric(y)) {
     stop("The argument must be numeric.")
   }

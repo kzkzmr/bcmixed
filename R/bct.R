@@ -19,8 +19,8 @@
 #'   z <- bct(y, 0) #log transformation
 #'
 #' @export
-bct <- function(y, lambda){
-  if (sum(y<0)){
+bct <- function(y, lambda) {
+  if (sum(y < 0)) {
     stop("All valuesin y must be positive.")
   }
   if (lambda == 0) {

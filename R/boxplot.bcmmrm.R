@@ -36,7 +36,7 @@
 boxplot.bcmmrm <- function(x, timepoint = NULL, xlab = NULL,
                            ylab = NULL, main = T, sub = NULL, ...) {
 
-  if (is.null(timepoint)){
+  if (is.null(timepoint)) {
     nt <- length(x$median.mod)
     timepoint <- x$time.tbl$label[nt]
   }
@@ -44,28 +44,26 @@ boxplot.bcmmrm <- function(x, timepoint = NULL, xlab = NULL,
                         timepoint, ]
   rgm <- ceiling(max(abs(dgdat$res.tr), na.rm = T))
   group <- deparse(x$call$group)
-  time <- deparse(x$call$time)
-  if (is.null(xlab)){
+  if (is.null(xlab)) {
     xlab <- group
   }
-  if (is.null(ylab)){
+  if (is.null(ylab)) {
     ylab <- "Transformed residual"
   }
-  if (!is.null(main)){
-    if (main){
+  if (!is.null(main)) {
+    if (main) {
       main <- "Box-whisker plot for transformed residuals"
     }
   }
   bp <- boxplot(dgdat$res.tr ~ dgdat[, group],
           ylim = c(-rgm, rgm), main = main, sub = sub,
-          ylab = ylab, xlab = xlab, xaxt="n")
-  glabel = x$group.tbl$label
+          ylab = ylab, xlab = xlab, xaxt = "n")
+  glabel <- x$group.tbl$label
   axis(1, at = x$group.tbl$code, labels = glabel)
   abline(h = 0)
   xi <- 0.2 + seq(bp$n)
-  mn.t <- tapply(dgdat$res.tr, dgdat[, group], mean, na.rm=T)
-  sd.t <- tapply(dgdat$res.tr, dgdat[, group], sd, na.rm=T)
-
+  mn.t <- tapply(dgdat$res.tr, dgdat[, group], mean, na.rm = T)
+  sd.t <- tapply(dgdat$res.tr, dgdat[, group], sd, na.rm = T)
   points(xi, mn.t, pch = 4)
   arrows(xi, mn.t - sd.t, xi, mn.t + sd.t,
          code = 3, angle = 75, length = .1)

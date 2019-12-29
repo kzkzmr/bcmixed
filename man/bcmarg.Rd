@@ -70,8 +70,7 @@ for the marginal model parameter inference:
 }
 \examples{
  data(aidscd4)
- bcmarg(cd4 ~ as.factor(treatment) + as.factor(weekc) +
-        as.factor(treatment):as.factor(weekc),
+ bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc),
         data = aidscd4, time = weekc, id = id, structure = "AR(1)")
 
 }

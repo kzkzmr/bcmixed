@@ -72,42 +72,46 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
                         ylab = NULL, xlim = NULL, ylim = NULL,
                         lwd = 2, col = NULL, lty = NULL,
                         main = T, sub = NULL, legend = T, loc = "topright",
-                        ...){
+                        ...) {
   x <- summary(x, robust = robust, ssadjust = ssadjust)
   med <- x$median
   if (is.null(ylab)) {
     ylab <- deparse(x$call$outcome)
   }
   ng <- nrow(med[[1]])
-  if (is.null(col)){
+  if (is.null(col)) {
     col <- rep("black", ng)
   }
   glabel <- x$group.tbl$label
-  if (length(med) == 1 | !is.null(timepoint)){
-    if (!is.null(timepoint)) med <- med[[x$time.tbl$code[x$time.tbl$label == timepoint]]]
-    else med <- med[[1]]
+  if (length(med) == 1 | !is.null(timepoint)) {
+    if (!is.null(timepoint)) {
+      med <- med[[x$time.tbl$code[x$time.tbl$label == timepoint]]]
+    } else {
+      med <- med[[1]]
+    }
 
     Group <- 1:ng
-    if (is.null(ylim)){
+    if (is.null(ylim)) {
       upl <- max(med$upper.CL) * 1.2
       lol <- min(med$lower.CL) * 0.8
       ylim <- c(lol, upl)
     }
-    if (is.null(xlim)){
+    if (is.null(xlim)) {
       xlim <- c(0.5, ng + 0.5)
     }
 
     if (is.null(xlab)) {
       xlab <- deparse(x$call$group)
     }
-    if (!is.null(main)){
-      if (main == T){
+    if (!is.null(main)) {
+      if (main == T) {
         main <- "Plot for model median of each group"
       }
     }
 
     plot(1, 1, xlim = xlim, ylim = ylim, type = "n", ylab = ylab, xlab = xlab,
-         xaxt="n",  panel.first = grid(NA, NULL, lty = 2, col = "#E9DECA", ...),
+         xaxt = "n",
+         panel.first = grid(NA, NULL, lty = 2, col = "#E9DECA", ...),
          main = main, sub = sub)
     axis(1, at = Group, labels = glabel)
 
@@ -124,7 +128,7 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
     Time2 <- x$time.tbl$label
     Time1 <- x$time.tbl$code
     nt <- max(Time1)
-    if (tnom == 1){
+    if (tnom == 1) {
       Time0 <- Time1
       hh <- 1
     } else {
@@ -132,16 +136,15 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
       hh <- (Time2[nt] - Time2[1]) / nt
     }
     Time <- list()
-
     est <- list()
     upper <- list()
     lower <- list()
-    for (i in 1:ng){
+    for (i in 1:ng) {
       Time[[i]] <- Time0 + 0.05 * dt * hh * (2 * i - ng - 1)
       est0 <- c()
       upper0 <- c()
       lower0 <- c()
-      for (j in 1:nt){
+      for (j in 1:nt) {
         est0 <- c(est0, med[[j]]$median[i])
         upper0 <- c(upper0, med[[j]]$upper.CL[i])
         lower0 <- c(lower0, med[[j]]$lower.CL[i])
@@ -156,13 +159,13 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
       up <- c(up, med[[i]]$upper.CL)
       lo <- c(lo, med[[i]]$lower.CL)
     }
-    if (is.null(ylim)){
+    if (is.null(ylim)) {
       upl <- max(up) * 1.2
       lol <- min(lo) * 0.8
       ylim <- c(lol, upl)
     }
-    if (is.null(xlim)){
-      if (tnom == 1){
+    if (is.null(xlim)) {
+      if (tnom == 1) {
         xlim <- c(0.5, nt + 0.5)
       } else {
         lx <- min(Time2)
@@ -174,31 +177,29 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
     if (is.null(xlab)) {
       xlab <- deparse(x$call$time)
     }
-    if (!is.null(main)){
-      if (main == T){
+    if (!is.null(main)) {
+      if (main == T) {
         main <- "Longitudinal plot for model median of each group"
       }
     }
-
     plot(1, 1, xlim = xlim, ylim = ylim, type = "n", ylab = ylab, xlab = xlab,
-         xaxt="n",  panel.first = grid(NA, NULL, lty = 2, col = "#E9DECA"),
+         xaxt = "n",  panel.first = grid(NA, NULL, lty = 2, col = "#E9DECA"),
          main = main, sub = sub, ...)
     if (tnom == 1) {
       axis(1, at = Time0, labels = Time2)
     } else {
       axis(1, at = Time0)
     }
-    if (is.null(lty)){
+    if (is.null(lty)) {
       lty <- 1:ng
     }
-
-    for (i in 1:ng){
+    for (i in 1:ng) {
       lines(Time[[i]], est[[i]], lty = lty[i], lwd = lwd, col = col[i])
       arrows(Time[[i]], upper[[i]], Time[[i]], lower[[i]],
              code = 3, angle = 90, length = .07 * dt, lwd = lwd,
              col = col[i])
     }
-    if (legend){
+    if (legend) {
       legend(loc, legend = glabel, lty = lty, col = col, lwd = lwd)
     }
     cat("Analysis information:\n")

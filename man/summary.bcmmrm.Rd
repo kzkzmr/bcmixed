@@ -27,7 +27,8 @@ a full description of the components) plus the following components:
   \item{\code{median}}{a list including inference results of the model median
         for specified values of \code{robust} and \code{ssadjust}.}
   \item{\code{meddif}}{a list including inference results of the model median
-        difference for specified values of \code{robust} and \code{ssadjust}.}
+        difference for specified values of \code{robust} and
+        \code{ssadjust}.}
   \item{\code{robust}}{a specified value of \code{robust}.}
   \item{\code{ssadjust}}{a specified value of \code{ssadjust}.}
 }
@@ -44,5 +45,6 @@ of \code{object}.
 
 }
 \seealso{
-\code{\link{bcmmrm}}, \code{\link{bcmmrmObject}}, \code{\link{summary}}
+\code{\link{bcmmrm}}, \code{\link{bcmmrmObject}},
+         \code{\link{summary}}
 }

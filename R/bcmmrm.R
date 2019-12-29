@@ -4,9 +4,9 @@
 #' between treatment groups proposed by Maruo et al. (2017), which focuses on
 #' continuous and positive longitudinally observed outcomes and a situation
 #' where the efficacy of some treatments is compared based on a randomized,
-#' parallel group clinical trial. If \code{time} and \code{id} are not specified,
-#' inference results reduce to the results for the context of linear regression
-#' model provided by Maruo et al. (2015).
+#' parallel group clinical trial. If \code{time} and \code{id} are not
+#' specified, inference results reduce to the results for the context of
+#' linear regression model provided by Maruo et al. (2015).
 #'
 #' @param outcome a name of positive outcome (dependent) variable included in
 #'   \code{data}.
@@ -85,7 +85,7 @@
 #' @export
 bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                    covv = NULL, cfactor = NULL, structure = "UN",
-                   lmdint = c(-3, 3), glabel = NULL, tlabel = NULL){
+                   lmdint = c(-3, 3), glabel = NULL, tlabel = NULL) {
   Call <- match.call()
   y <- deparse(substitute(outcome))
   data0 <- data
@@ -94,9 +94,9 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   data0$y <- data0[, y]
   covform <- ""
   cct <- 0
-  if (!is.null(covv)){
+  if (!is.null(covv)) {
     cct <- numeric(length(covv)) + 1
-    for (i in 1:length(covv)){
+    for (i in seq_len(length(covv))) {
       if (cfactor[i] == 0) {
         covform <- paste(covform, "+", covv[i])
       } else {
@@ -106,7 +106,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     }
   }
   ng <- length(unique(data0$group))
-  if (is.null(glabel)){
+  if (is.null(glabel)) {
     glabel <- names(table(as.factor(data0$group)))
   }
   group.tbl <- data.frame(code = 1:ng, label = glabel)
@@ -120,7 +120,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     id <- deparse(substitute(id))
     data0$time0 <- data0[, time]
     time.tbl <- sort(unique(data0$time0))
-    for (i in 1:length(time.tbl)){
+    for (i in seq_len(length(time.tbl))) {
       data0[data0$time0 == time.tbl[i], "time"] <- i
     }
     data0$id <- data0[, id]
@@ -131,12 +131,11 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
       tlabel <- time.tbl
     }
     time.tbl <- data.frame(code = 1:nt, label = tlabel)
-    casenames <- names(table(data$id))
     msflg <- table(data0$id, is.na(data0$y))[, 1]
     N <- sum(msflg != 0)
     omis <- names(msflg)[msflg == 0]
-    if (length(omis) > 0L){
-      for (i in 1:length(omis)){
+    if (length(omis) > 0L) {
+      for (i in seq_len(length(omis))) {
         data0 <- data0[data0$id != omis[i], ]
       }
     }
@@ -166,12 +165,12 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   iIIr <- try1$Vtheta.rob
   options(na.action = "na.pass")
   X <- model.matrix(formula, data = data0)
-  if (nt != 1){
+  if (nt != 1) {
     X <- X[!duplicated(data0$id), ]
   }
   dimnames(X) <- NULL
   xcm <- 0
-  if (!is.null(covv)){
+  if (!is.null(covv)) {
     if (nc == 1)  {
       xcm <- mean(X[, ng + nt])
     } else {
@@ -183,7 +182,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   Ncc <- adj.prm[2]
   n.data <- adj.prm[3]
   n.na <- adj.prm[4]
-  if (structure == "UN" & nt != 1){
+  if (structure == "UN" & nt != 1) {
     nu <- Ncc - nt
     nu2 <- sqrt(Ncc / nu)
   } else if (nt == 1) {
@@ -196,8 +195,8 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   cbn <- choose(ng, 2)
   comb <- matrix(0, cbn, 2)
   count <- 1
-  for (ii in 1:ng){
-    for (jj in 1:ng){
+  for (ii in 1:ng) {
+    for (jj in 1:ng) {
       if (ii < jj) {
         comb[count, 1] <- ii
         comb[count, 2] <- jj
@@ -213,11 +212,11 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   meddif.rob <- list()
   meddif.mod.adj <- list()
   meddif.rob.adj <- list()
-  for (tp0 in 1:nt){
+  for (tp0 in 1:nt) {
     xi <- numeric(ng)
     bt <- 0
     dbt <- numeric(nt - 1)
-    if (tp0 != 1){
+    if (tp0 != 1) {
       bt <- beta[ng + tp0 - 1]
       dbt[tp0 - 1] <- 1
     }
@@ -229,16 +228,16 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     SExi <- numeric(ng)
     SExir <- numeric(ng)
     Dt <- matrix(0, 1 + nb + ns, ng)
-    for (i in 1:ng){
+    for (i in 1:ng) {
       bg <- 0
       dbg <- numeric(ng - 1)
-      if ( i != 1) {
+      if (i != 1) {
         bg <- beta[i]
         dbg[i - 1] <- 1
       }
       bgt <- 0
       dbgt <- numeric((ng - 1) * (nt - 1))
-      if (i != 1 & tp0 != 1){
+      if (i != 1 & tp0 != 1) {
         bgti <- (tp0 - 2) * (ng - 1) + i - 1
         bgt <- beta[ng + nt + nc - 1 + bgti]
         dbgt[bgti] <- 1
@@ -257,7 +256,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     delta <- numeric(cbn)
     SEd <- numeric(cbn)
     SEdr <- numeric(cbn)
-    for (i in 1:cbn){
+    for (i in 1:cbn) {
       delta[i] <- xi[comb[i, 2]] - xi[comb[i, 1]]
       SEd[i] <- sqrt(c(t(Dt[, comb[i, 2]] - Dt[, comb[i, 1]]) %*% iII %*%
                          (Dt[, comb[i, 2]] - Dt[, comb[i, 1]])))
@@ -322,11 +321,10 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                                         upper.CL = upperdr2,
                                         t.value = tvaluer2, p.value = pvaluer2)
   }
-  data$ytr <- (data0$y^le-1)/le
+  data$ytr <- (data0$y ^ le - 1) / le
   data$ytr.fitted <- data$ytr
   data$ytr.fitted[!is.na(data$ytr.fitted)] <- fitted
   data$res.tr <- data$ytr - data$ytr.fitted
-
 
   structure(class = "bcmmrm",
             list(call = Call, median.mod = median.mod,
@@ -340,9 +338,9 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
 }
 
 #' @export
-logLik.bcmmrm <- function (object, REML = F, ...){
+logLik.bcmmrm <- function(object, REML = F, ...) {
   if (REML) {
-    stop ("REML method can not be used in bcmmrm.")
+    stop("REML method can not be used in bcmmrm.")
   }
   structure(object$logLik,
             df = 1 + length(c(object$inf.marg$beta, object$inf.marg$alpha)),
@@ -350,17 +348,15 @@ logLik.bcmmrm <- function (object, REML = F, ...){
 }
 
 #' @export
-coef.bcmmrm <- function (object, ...){
+coef.bcmmrm <- function(object, ...) {
   coef(object$inf.marg$glsObject)
 }
 
 #' @export
-print.bcmmrm <-
-  function(x, ...)
-  {
+print.bcmmrm <- function(x, ...) {
     mCall <- x$call
     covstr <- mCall$structure
-    if (is.null(covstr) & !is.null(mCall$id)){
+    if (is.null(covstr) & !is.null(mCall$id)) {
       covstr <- "UN"
     }
     cat("Model median estimation based on MMRM with Box-Cox transformation\n")
@@ -370,18 +366,18 @@ print.bcmmrm <-
     cat("  ID:", deparse(mCall$id), "\n")
     cat("  Covariate(s):", deparse(mCall$covv), "\n")
     cat("  Covariance structure:", deparse(covstr), "\n")
-    cat("  Data:", deparse( mCall$data ), "\n")
+    cat("  Data:", deparse(mCall$data), "\n")
     cat("  Estimated transformation parameter: ",
         format(x$lambda, digits = 3), "\n")
     cat("  Log-likelihood: ", format(x$logLik), "\n", sep = "")
 
     nt <- length(x$median.mod)
     med <- c()
-    for (i in 1:nt){
+    for (i in 1:nt) {
       med <- cbind(med, x$median.mod[[i]]$median)
     }
     med <- cbind(x$group.tbl$label, as.data.frame(med))
-    if (nt > 1){
+    if (nt > 1) {
       names(med) <- c(paste(mCall$group, "|", mCall$time), x$time.tbl$label)
       cat("\nModel median estimates (row: group, col: time):\n")
       print(med, digits = 3, ...)
@@ -391,5 +387,4 @@ print.bcmmrm <-
       print(med, digits = 3, ...)
     }
     invisible(x)
-  }
-
+}

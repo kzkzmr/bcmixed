@@ -20,12 +20,14 @@
 #'   \item{\code{median}}{a list including inference results of the model median
 #'         for specified values of \code{robust} and \code{ssadjust}.}
 #'   \item{\code{meddif}}{a list including inference results of the model median
-#'         difference for specified values of \code{robust} and \code{ssadjust}.}
+#'         difference for specified values of \code{robust} and
+#'         \code{ssadjust}.}
 #'   \item{\code{robust}}{a specified value of \code{robust}.}
 #'   \item{\code{ssadjust}}{a specified value of \code{ssadjust}.}
 #' }
 #'
-#' @seealso \code{\link{bcmmrm}}, \code{\link{bcmmrmObject}}, \code{\link{summary}}
+#' @seealso \code{\link{bcmmrm}}, \code{\link{bcmmrmObject}},
+#'          \code{\link{summary}}
 #'
 #' @examples
 #'  data(aidscd4)
@@ -34,19 +36,19 @@
 #'
 #' @export
 summary.bcmmrm <- function(object, robust = T, ssadjust = T, ...) {
-  if (robust & ssadjust){
+  if (robust & ssadjust) {
     med <- object$median.rob.adj
     dif <- object$meddif.rob.adj
   }
-  if (!robust & ssadjust){
+  if (!robust & ssadjust) {
     med <- object$median.mod.adj
     dif <- object$meddif.mod.adj
   }
-  if (robust & !ssadjust){
+  if (robust & !ssadjust) {
     med <- object$median.rob
     dif <- object$meddif.rob
   }
-  if (!robust & !ssadjust){
+  if (!robust & !ssadjust) {
     med <- object$median.mod
     dif <- object$meddif.mod
   }
@@ -59,12 +61,10 @@ summary.bcmmrm <- function(object, robust = T, ssadjust = T, ...) {
 }
 
 #' @export
-print.summary.bcmmrm <-
-  function(x, digits = 3, ...)
-  {
+print.summary.bcmmrm <- function(x, digits = 3, ...) {
     mCall <- x$call
     covstr <- mCall$structure
-    if (is.null(covstr) & !is.null(mCall$id)){
+    if (is.null(covstr) & !is.null(mCall$id)) {
       covstr <- "UN"
     }
     cat("Model median inference based on MMRM with Box-Cox transformation\n")
@@ -74,7 +74,7 @@ print.summary.bcmmrm <-
     cat("  Time:", deparse(mCall$time), "\n")
     cat("  ID:", deparse(mCall$id), "\n")
     cat("  Covariate(s):", deparse(mCall$covv), "\n")
-    cat("  Data:", deparse( mCall$data ), "\n")
+    cat("  Data:", deparse(mCall$data), "\n")
     cat("\nAnalysis information:\n")
     cat("  Covariance structure:", deparse(covstr), "\n")
     cat("  Robust inference:", x$robust, "\n")
@@ -82,32 +82,30 @@ print.summary.bcmmrm <-
     cat("\nAnalysis results:\n")
     cat("  Estimated transformation parameter: ",
         format(x$lambda, digits = digits), "\n")
-
-
     nt <- length(x$median)
     ng <- nrow(x$median[[1]])
     group0 <- x$meddif[[1]]$group0
     glabel0 <- as.character(group0)
     group1 <- x$meddif[[1]]$group1
     glabel1 <- as.character(group1)
-    for (g in 1:ng){
-      if (sum(group0 == g) != 0){
+    for (g in 1:ng) {
+      if (sum(group0 == g) != 0) {
         glabel0[group0 == g] <- as.character(x$group.tbl$label[g])
       }
-      if (sum(group1 == g) != 0){
+      if (sum(group1 == g) != 0) {
         glabel1[group1 == g] <- as.character(x$group.tbl$label[g])
       }
     }
 
-    for (t in 1:nt){
+    for (t in 1:nt) {
       medt <- x$median[[t]]
       names(medt)[1] <- deparse(mCall$group)
       medt[, 1] <- x$group.tbl$label
-      cat("\n", "\nModel median inferences for", deparse(x$call$time), "=" ,
-          x$time.tbl$label[t], "\n","\n")
+      cat("\n", "\nModel median inferences for", deparse(x$call$time), "=",
+          x$time.tbl$label[t], "\n", "\n")
       print(medt, digits = digits, ...)
     }
-    for (t in 1:nt){
+    for (t in 1:nt) {
       dift <- x$meddif[[t]]
       names(dift)[1] <- paste(deparse(mCall$group), "1")
       names(dift)[2] <- paste(deparse(mCall$group), "0")
@@ -115,7 +113,7 @@ print.summary.bcmmrm <-
       dift[, 2] <- glabel0
       cat("\n", "\nInferences of model median difference between groups (",
           names(dift)[1], "-", names(dift)[2], ") for", deparse(x$call$time),
-          "=", x$time.tbl$label[t], "\n","\n")
+          "=", x$time.tbl$label[t], "\n", "\n")
       dift[, 8] <- round(dift[, 8], digits = digits)
       print(dift, digits = digits, ...)
     }
