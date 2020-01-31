@@ -11,10 +11,10 @@
 the Box-Cox transformed MMRM analysis.}
 
 \item{robust}{an optional logical value used to specify whether to apply
-the robust inference. Default is \code{TRUE}.}
+the robust inference. The default is \code{TRUE}.}
 
 \item{ssadjust}{an optional logical value used to specify whether to apply
-the empirical small sample adjustment. Default is \code{TRUE}.}
+the empirical small sample adjustment. The default is \code{TRUE}.}
 
 \item{...}{some methods for this generic require additional arguments.
 None are used in this method.}

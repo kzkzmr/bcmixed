@@ -6,8 +6,8 @@
 #' @details \tabular{ll}{
 #' Package:\tab bcmixed\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.0\cr
-#' Date: \tab 2017-04-12\cr
+#' Version: \tab 0.9.0\cr
+#' Date: \tab 2020-01-30\cr
 #' }
 #' @name bcmixed
 #' @docType package

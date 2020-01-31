@@ -7,14 +7,14 @@
 #' @param x an object inheriting from class "\code{bcmmrm}", representing
 #' the Box-Cox transformed MMRM analysis.
 #' @param timepoint an numeric value of a specified level of \code{time}
-#' variable. Default is \code{NULL} and the last level is specified.
-#' @param xlab a title for the x axis. Default is \code{NULL} and
+#' variable. The default is \code{NULL} and the last level is specified.
+#' @param xlab a title for the x axis. The default is \code{NULL} and
 #'  the name of \code{time} or \code{group} variable is used.
-#' @param ylab a title for the y axis. Default is \code{NULL} and
+#' @param ylab a title for the y axis. The default is \code{NULL} and
 #'  the default title is "Transformed residuals".
-#' @param main a main title for the plot. Default is \code{TRUE} and
+#' @param main a main title for the plot. The default is \code{TRUE} and
 #'  default title is "Box-whisker plot for transformed residuals".
-#' @param sub a sub title for the plot. Default is \code{NULL}.
+#' @param sub a sub title for the plot. The default is \code{NULL}.
 #' @param ... some methods for this generic require additional arguments.
 #'
 #' @return a box-whisker plot for transformed residual.

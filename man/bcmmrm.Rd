@@ -13,6 +13,7 @@ bcmmrm(
   covv = NULL,
   cfactor = NULL,
   structure = "UN",
+  conf.level = 0.95,
   lmdint = c(-3, 3),
   glabel = NULL,
   tlabel = NULL
@@ -24,35 +25,38 @@ bcmmrm(
 
 \item{group}{a name of treatment group variable included in \code{data}.}
 
-\item{data}{a data frame which may include \code{outcome}, \code{group},
+\item{data}{a data frame that may include \code{outcome}, \code{group},
 \code{time}, \code{id}, and specified covariate variables.}
 
 \item{time}{a name of time variable for repeated measurements included
-in \code{data}. Default is \code{NULL}.}
+in \code{data}. The default is \code{NULL}.}
 
 \item{id}{a name of subject id variable for repeated measurements included
-in \code{data}. Default is \code{NULL}.}
+in \code{data}. The default is \code{NULL}.}
 
 \item{covv}{a character vector with names of covariate variables included
-in \code{data}. Default is \code{NULL}..}
+in \code{data}. The default is \code{NULL}.}
 
 \item{cfactor}{an integer vector including nominal variable indicators for
 covariate variables. Nominal variable: \code{1}, continuous variable:
-\code{0}. Default is \code{NULL}.}
+\code{0}. The default is \code{NULL}.}
 
 \item{structure}{specify the covariance structure from \code{c("UN", "CS",
-"AR(1)")}. Default is \code{"UN"}.}
+"AR(1)")}. The default is \code{"UN"}.}
+
+\item{conf.level}{a numeric value of the confidence level for the
+confidence intervals. The default is 0.95.}
 
 \item{lmdint}{a vector containing the end-points of the interval to be
-searched for a transformation parameter. Default is \code{c(-3, 3)}.}
+searched for a transformation parameter. The default is \code{c(-3, 3)}.}
 
 \item{glabel}{a vector of length number of treatment groups containing
-the labels of \code{group} variable. Default is \code{NULL} and the
+the labels of \code{group} variable. The default is \code{NULL} and the
 levels of \code{group} variable in \code{data} are used.}
 
 \item{tlabel}{a vector of length number of repeated measures containing
-the labels of \code{time} variable. Default is \code{NULL} and the levels
-of \code{time} variable in \code{data} are used.}
+the labels of \code{time} variable. The default is \code{NULL} and the
+levels of \code{time} variable in \code{data} are used.}
 }
 \value{
 an object of class "\code{bcmmrm}" representing the results of model
@@ -80,22 +84,16 @@ If baseline observation for the outcome variable is available, Box-Cox
 \examples{
 data(aidscd4)
 
-# Example 1-------------------------------------
-# covariates: no covariate, covariance structure: UN structure (default)
-
-# Fitting BCMMRM model
-bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
-       id = id)
-
-# Example 2-------------------------------------
 # covariate: Box-Cox transformed baseline (continuous) and sex (nominal),
 # covariance structure: AR(1) structure
+# *Note: The UN structure is preferred although the AR(1)
+#        structure is used in this example to reduce calculation time
 
 # Box-Cox transformation for the baseline
 lmd.bl <- bcmarg(cd4.bl ~ 1, data = aidscd4[aidscd4$weekc == 8, ])$lambda
 aidscd4$cd4.bl.tr <- bct(aidscd4$cd4.bl, lmd.bl)
 
-# Fitting BCMMRM model
+# Median inference for each group and week
 bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
        id = id, covv = c("cd4.bl.tr", "sex"), cfactor = c(0, 1),
        structure = "AR(1)", glabel = c("Zid/Did", "Zid+Zal", "Zid+Did",

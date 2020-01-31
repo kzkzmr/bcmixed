@@ -1,0 +1,68 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# bcmixed
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of bcmixed is to conduct inferences on the marginal model of the mixed
+    effect model with the Box-Cox transformation and/or on the model median 
+    differences between treatment groups for longitudinal randomized clinical 
+    trials.
+
+
+## Installation
+
+You can install the released version of bcmixed from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("bcmixed")
+```
+
+And the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("kzkzmr/bcmixed")
+```
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(bcmixed)
+data(aidscd4)
+# Marginal model of mixed model with the Box-Cox transformation
+res1 <- bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc) + age,
+       data = aidscd4, time = weekc, id = id)
+summary(res1)
+
+# Box-Cox transformation for the baseline
+lmd.bl <- bcmarg(cd4.bl ~ 1, data = aidscd4[aidscd4$weekc == 8, ])$lambda
+aidscd4$cd4.bl.tr <- bct(aidscd4$cd4.bl, lmd.bl)
+
+# Inference on model median differences between groups at each time point
+res2 <- bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
+       id = id, covv = c("cd4.bl.tr", "sex"), cfactor = c(0, 1),
+       glabel = c("Zid/Did", "Zid+Zal", "Zid+Did", "Zid+Did+Nev"))
+
+# Summarize
+print(res2)
+
+summary(res2)
+
+plot(res2, ylab = "CD4+1", xlab = "Week")
+```

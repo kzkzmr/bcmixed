@@ -23,7 +23,7 @@
 #'           and 4 = zidovudine plus 400mg of didanosine plus 400mg of
 #'           nevirapine.}
 #'     \item{\code{age}}{patients' age (years).}
-#'     \item{\code{sex}}{patients' sex (1 = man, 0 = woman)}
+#'     \item{\code{sex}}{patients' sex (1 = male, 0 = female)}
 #'     \item{\code{cd4.bl}}{baseline value of CD4 cells count + 1.}
 #'     \item{\code{cd4}}{CD4 cells count + 1.}
 #'   }

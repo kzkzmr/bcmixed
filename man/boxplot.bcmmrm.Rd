@@ -19,18 +19,18 @@
 the Box-Cox transformed MMRM analysis.}
 
 \item{timepoint}{an numeric value of a specified level of \code{time}
-variable. Default is \code{NULL} and the last level is specified.}
+variable. The default is \code{NULL} and the last level is specified.}
 
-\item{xlab}{a title for the x axis. Default is \code{NULL} and
+\item{xlab}{a title for the x axis. The default is \code{NULL} and
 the name of \code{time} or \code{group} variable is used.}
 
-\item{ylab}{a title for the y axis. Default is \code{NULL} and
+\item{ylab}{a title for the y axis. The default is \code{NULL} and
 the default title is "Transformed residuals".}
 
-\item{main}{a main title for the plot. Default is \code{TRUE} and
+\item{main}{a main title for the plot. The default is \code{TRUE} and
 default title is "Box-whisker plot for transformed residuals".}
 
-\item{sub}{a sub title for the plot. Default is \code{NULL}.}
+\item{sub}{a sub title for the plot. The default is \code{NULL}.}
 
 \item{...}{some methods for this generic require additional arguments.}
 }

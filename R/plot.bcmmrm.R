@@ -6,52 +6,52 @@
 #' @param x an object inheriting from class "\code{bcmmrm}", representing
 #' the Box-Cox transformed MMRM analysis.
 #' @param robust an optional logical value used to specify whether to apply
-#' the robust inference. Default is \code{TRUE}.
+#' the robust inference. The default is \code{TRUE}.
 #' @param ssadjust an optional logical value used to specify whether to apply
-#' the empirical small sample adjustment. Default is \code{TRUE}.
+#' the empirical small sample adjustment. The default is \code{TRUE}.
 #' @param tnom a optional logical value indicating the scale of x axis
 #' of the longitudinal median plot. When \code{tnom} is \code{TRUE}, nominal
 #' scale is used and widths between any combinations of neighbor time points
 #' are same. When \code{tnom} is \code{FALSE}, actual scale of \code{time}
-#' variable is used. Default is \code{TRUE}.
+#' variable is used. The default is \code{TRUE}.
 #' @param dt an numeric value indicating shift length between groups
 #'  in the longitudinal median plot. A multiplying factor for the default
 #'  settings specified (e.g. if \code{2} is specified,
 #'  shift length is twice longer than that for the default setting).
-#'  Default is \code{1}.
+#'  The default is \code{1}.
 #' @param timepoint an numeric value of a specified level of \code{time}
 #' variable at which median plot is created. When \code{timepoint} is
 #' \code{NULL} and number of time points is not 1, longitudinal median plot
 #' (x axis is \code{time}) is created. Otherwise, median plot where
-#' x axis is \code{group} is created. Default is \code{NULL}.
-#' @param xlab a title for the x axis. Default is \code{NULL} and
+#' x axis is \code{group} is created. The default is \code{NULL}.
+#' @param xlab a title for the x axis. The default is \code{NULL} and
 #'  the name of \code{time} or \code{group} variable is used.
-#' @param ylab a title for the y axis. Default is \code{NULL} and
+#' @param ylab a title for the y axis. The default is \code{NULL} and
 #'  the name of \code{outcome} variable is used.
 #' @param xlim a numeric vector with length of 2 indicating limits of x
-#'  axis. Default is \code{NULL} and limits are calculated automatically.
+#'  axis. The default is \code{NULL} and limits are calculated automatically.
 #' @param ylim a numeric vector with length of 2 indicating limits of y
-#'  axis. Default is \code{NULL} and limits are calculated automatically.
+#'  axis. The default is \code{NULL} and limits are calculated automatically.
 #' @param lwd an optional positive numeric value indicating line width.
-#' Default is \code{2}.
+#' The default is \code{2}.
 #' @param col an integer or a character vector with length of the number of
-#'  groups indicating colors of lines for each treatment group. Default is
+#'  groups indicating colors of lines for each treatment group. The default is
 #'  \code{NULL} and all of colors are black.
 #' @param lty an optional integer or a character vector with length of the
 #'  number of groups indicating line types of lines for each treatment group.
-#'  Default is \code{NULL} and \code{1:ng} is used, where ng is number of
+#'  The default is \code{NULL} and \code{1:ng} is used, where ng is number of
 #'  groups.
-#' @param main a main title for the plot. Default is \code{TRUE} and
+#' @param main a main title for the plot. The default is \code{TRUE} and
 #'  default title is "(Longitudunal) Plot for median of each group".
-#' @param sub a sub title for the plot. Default is \code{NULL}.
+#' @param sub a sub title for the plot. The default is \code{NULL}.
 #' @param legend a logical optional value specifying to add legends to
 #'  plots. When \code{legend} is \code{TRUE} legends are added to the plot.
-#'  Otherwise, legends are not added.  Default is \code{TRUE}.
+#'  Otherwise, legends are not added.  The default is \code{TRUE}.
 #' @param loc a character value indicating the location of the legends.
 #' The location can be specified by setting \code{loc} to a single keyword
 #' from the list \code{"bottomright"}, \code{"bottom"}, \code{"bottomleft"},
 #' \code{"left"}, \code{"topleft"}, \code{"top"}, \code{"topright"},
-#' \code{"right"}, and \code{"center"}. Default is \code{"topright"}.
+#' \code{"right"}, and \code{"center"}. The default is \code{"topright"}.
 #' @param ... some methods for this generic require additional arguments.
 #'
 #' @return a median plot.
@@ -122,7 +122,7 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
     cat("  Covariance structure:", deparse(x$call$structure), "\n")
     cat("  Robust inference:", x$robust, "\n")
     cat("  Empirical small sample adjustment:", x$ssadjust, "\n")
-    cat("\nError bar: 95% confidence interval\n")
+    cat("\nError bar:", x$conf.level * 100, "% confidence interval\n")
     cat("\nTimepoint:", deparse(x$call$time), "=", timepoint)
   } else {
     Time2 <- x$time.tbl$label

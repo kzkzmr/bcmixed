@@ -11,27 +11,29 @@
 #' @param outcome a name of positive outcome (dependent) variable included in
 #'   \code{data}.
 #' @param group  a name of treatment group variable included in \code{data}.
-#' @param data a data frame which may include \code{outcome}, \code{group},
+#' @param data a data frame that may include \code{outcome}, \code{group},
 #'   \code{time}, \code{id}, and specified covariate variables.
 #' @param time a name of time variable for repeated measurements included
-#'   in \code{data}. Default is \code{NULL}.
+#'   in \code{data}. The default is \code{NULL}.
 #' @param id a name of subject id variable for repeated measurements included
-#'   in \code{data}. Default is \code{NULL}.
+#'   in \code{data}. The default is \code{NULL}.
 #' @param covv a character vector with names of covariate variables included
-#'   in \code{data}. Default is \code{NULL}..
+#'   in \code{data}. The default is \code{NULL}.
 #' @param cfactor an integer vector including nominal variable indicators for
 #'   covariate variables. Nominal variable: \code{1}, continuous variable:
-#'   \code{0}. Default is \code{NULL}.
+#'   \code{0}. The default is \code{NULL}.
 #' @param structure specify the covariance structure from \code{c("UN", "CS",
-#'   "AR(1)")}. Default is \code{"UN"}.
+#'   "AR(1)")}. The default is \code{"UN"}.
+#' @param conf.level a numeric value of the confidence level for the
+#'   confidence intervals. The default is 0.95.
 #' @param lmdint a vector containing the end-points of the interval to be
-#'   searched for a transformation parameter. Default is \code{c(-3, 3)}.
+#'   searched for a transformation parameter. The default is \code{c(-3, 3)}.
 #' @param glabel a vector of length number of treatment groups containing
-#'   the labels of \code{group} variable. Default is \code{NULL} and the
+#'   the labels of \code{group} variable. The default is \code{NULL} and the
 #'   levels of \code{group} variable in \code{data} are used.
 #' @param tlabel a vector of length number of repeated measures containing
-#'   the labels of \code{time} variable. Default is \code{NULL} and the levels
-#'   of \code{time} variable in \code{data} are used.
+#'   the labels of \code{time} variable. The default is \code{NULL} and the
+#'   levels of \code{time} variable in \code{data} are used.
 #'
 #' @return an object of class "\code{bcmmrm}" representing the results of model
 #'   median inference based on the Box-Cox transformed MMRM model.
@@ -59,22 +61,16 @@
 #' @examples
 #' data(aidscd4)
 #'
-#' # Example 1-------------------------------------
-#' # covariates: no covariate, covariance structure: UN structure (default)
-#'
-#' # Fitting BCMMRM model
-#' bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
-#'        id = id)
-#'
-#' # Example 2-------------------------------------
 #' # covariate: Box-Cox transformed baseline (continuous) and sex (nominal),
 #' # covariance structure: AR(1) structure
+#' # *Note: The UN structure is preferred although the AR(1)
+#' #        structure is used in this example to reduce calculation time
 #'
 #' # Box-Cox transformation for the baseline
 #' lmd.bl <- bcmarg(cd4.bl ~ 1, data = aidscd4[aidscd4$weekc == 8, ])$lambda
 #' aidscd4$cd4.bl.tr <- bct(aidscd4$cd4.bl, lmd.bl)
 #'
-#' # Fitting BCMMRM model
+#' # Median inference for each group and week
 #' bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
 #'        id = id, covv = c("cd4.bl.tr", "sex"), cfactor = c(0, 1),
 #'        structure = "AR(1)", glabel = c("Zid/Did", "Zid+Zal", "Zid+Did",
@@ -85,7 +81,11 @@
 #' @export
 bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                    covv = NULL, cfactor = NULL, structure = "UN",
-                   lmdint = c(-3, 3), glabel = NULL, tlabel = NULL) {
+                   conf.level = 0.95, lmdint = c(-3, 3),
+                   glabel = NULL, tlabel = NULL) {
+  if (conf.level <= 0 | conf.level >= 1) {
+    stop("conf.level must be within the range of c(0,1)")
+  }
   Call <- match.call()
   y <- deparse(substitute(outcome))
   data0 <- data
@@ -267,7 +267,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     SExir2 <- SExir * nu2
     SEd2 <- SEd * nu2
     SEdr2 <- SEdr * nu2
-    sig.level <- 0.05
+    sig.level <- 1 - conf.level
     tt <- qnorm(1 - sig.level / 2)
     tvalue <- delta / SEd
     pvalue <- (1 - pnorm(abs(tvalue))) * 2
@@ -334,7 +334,8 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                  meddif.mod.adj = meddif.mod.adj,
                  meddif.rob.adj = meddif.rob.adj, lambda = le, R = RR,
                  logLik = lik, betainf = try1$betainf, time.tbl = time.tbl,
-                 group.tbl = group.tbl, inf.marg = try1, outdata = data))
+                 group.tbl = group.tbl, inf.marg = try1, outdata = data,
+                 conf.level = conf.level))
 }
 
 #' @export

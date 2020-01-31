@@ -10,13 +10,14 @@
 #'   the response on the left of a ~ operator and the terms, separated by +
 #'   operators, on the right.
 #' @param data a data frame containing the variables used in the model.
-#' @param time time variable name for repeated measurements. Default is NULL.
-#' @param id subject id variable name for repeated measurements. Default is
+#' @param time time variable name for repeated measurements. The default is
+#'   NULL.
+#' @param id subject id variable name for repeated measurements. The default is
 #'   NULL.
 #' @param structure specify the covariance structure from c("UN", "CS",
-#'   "AR(1)"). Default is "UN".
+#'   "AR(1)"). The default is "UN".
 #' @param lmdint a vector containing the end-points of the interval to be
-#'   searched for a transformation parameter. Default is c(-3, 3).
+#'   searched for a transformation parameter. The default is c(-3, 3).
 #'
 #' @return an object of class "\code{bcmarg}". Objects of this class have
 #' methods for the generic functions  \code{coef}, \code{logLik},
@@ -60,7 +61,7 @@
 #'
 #' @examples
 #'  data(aidscd4)
-#'  bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc),
+#'  bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc) + age,
 #'         data = aidscd4, time = weekc, id = id, structure = "AR(1)")
 #'
 #' @importFrom nlme gls glsControl corSymm varIdent corCompSymm corAR1
@@ -163,6 +164,9 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
     data$id <- as.character(data[, deparse(substitute(id))])
     ttbl <- as.numeric(names(table(data[, timec])))
     nt <- length(ttbl)
+    if (!structure %in% c("UN", "CS", "AR(1)")) {
+      stop("Select structure from c(\"UN\", \"CS\", \"AR(1)\")")
+    }
     time2 <- data[, timec]
     for (i in 1:nt) {
       time2[data[, timec] == ttbl[i]] <- i

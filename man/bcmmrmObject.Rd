@@ -36,6 +36,8 @@ object.\describe{
           (\code{ytr}), the fitted values on the transformed scale
           (\code{ytr.fitted}), and the residuals on the transformed scale
           (\code{res.tr}) are added to input data.}
+    \item{\code{conf.level}}{a numeric value of the specified confidence
+          level.}
   }
 }
 \description{

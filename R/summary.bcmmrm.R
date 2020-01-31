@@ -7,9 +7,9 @@
 #' @param object an object inheriting from class "\code{bcmmrm}", representing
 #' the Box-Cox transformed MMRM analysis.
 #' @param robust an optional logical value used to specify whether to apply
-#' the robust inference. Default is \code{TRUE}.
+#' the robust inference. The default is \code{TRUE}.
 #' @param ssadjust an optional logical value used to specify whether to apply
-#' the empirical small sample adjustment. Default is \code{TRUE}.
+#' the empirical small sample adjustment. The default is \code{TRUE}.
 #' @param ... some methods for this generic require additional arguments.
 #' None are used in this method.
 #'
@@ -79,6 +79,7 @@ print.summary.bcmmrm <- function(x, digits = 3, ...) {
     cat("  Covariance structure:", deparse(covstr), "\n")
     cat("  Robust inference:", x$robust, "\n")
     cat("  Empirical small sample adjustment:", x$ssadjust, "\n")
+    cat("  Confidence level:", x$conf.level, "\n")
     cat("\nAnalysis results:\n")
     cat("  Estimated transformation parameter: ",
         format(x$lambda, digits = digits), "\n")

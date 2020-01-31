@@ -20,16 +20,17 @@ operators, on the right.}
 
 \item{data}{a data frame containing the variables used in the model.}
 
-\item{time}{time variable name for repeated measurements. Default is NULL.}
+\item{time}{time variable name for repeated measurements. The default is
+NULL.}
 
-\item{id}{subject id variable name for repeated measurements. Default is
+\item{id}{subject id variable name for repeated measurements. The default is
 NULL.}
 
 \item{structure}{specify the covariance structure from c("UN", "CS",
-"AR(1)"). Default is "UN".}
+"AR(1)"). The default is "UN".}
 
 \item{lmdint}{a vector containing the end-points of the interval to be
-searched for a transformation parameter. Default is c(-3, 3).}
+searched for a transformation parameter. The default is c(-3, 3).}
 }
 \value{
 an object of class "\code{bcmarg}". Objects of this class have
@@ -70,7 +71,7 @@ for the marginal model parameter inference:
 }
 \examples{
  data(aidscd4)
- bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc),
+ bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc) + age,
         data = aidscd4, time = weekc, id = id, structure = "AR(1)")
 
 }
