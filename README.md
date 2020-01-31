@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![Travis build
+status](https://travis-ci.org/kzkzmr/bcmixed.svg?branch=master)](https://travis-ci.org/kzkzmr/bcmixed)
 <!-- badges: end -->
 
 The goal of bcmixed is to conduct inferences on the marginal model of
