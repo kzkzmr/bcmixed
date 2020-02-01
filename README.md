@@ -12,7 +12,7 @@ status](https://travis-ci.org/kzkzmr/bcmixed.svg?branch=master)](https://travis-
 The bcmixed package provides two categories of important functions:
 bcmarg and bcmmrm. The bcmarg function provides inferences on the
 marginal model of the mixed effect model with the Box-Cox transformation
-and the bcmmrm function provideson inferences on the model median
+and the bcmmrm function provides inferences on the model median
 differences between treatment groups for longitudinal randomized
 clinical trials. These statistical methods are proposed by Maruo et
 al. (2017, <doi:10.1002/sim.6408>).

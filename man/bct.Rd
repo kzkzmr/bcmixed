@@ -9,7 +9,7 @@ bct(y, lambda)
 \arguments{
 \item{y}{a positive real number vector.}
 
-\item{lambda}{a scaler transformation parameter.}
+\item{lambda}{a scalar transformation parameter.}
 }
 \value{
 bct returns the Box-Cox transformed numeric vector,

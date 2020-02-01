@@ -1,10 +1,10 @@
 #' Marginal Model of the Mixed Effect Model with the Box-Cox Transformation.
 #'
-#' \code{bcmarg} returns the inference resutls the parameters of
+#' \code{bcmarg} returns the inference results the parameters of
 #'   the marginal model of the linear mixed effect model with the Box-Cox
 #'   transformation proposed by Maruo et al. (2017). If time and id are not
 #'   specified, inference results reduce to the results for the context of
-#'   linear regression model proveded by Maruo et al. (2015).
+#'   linear regression model provided by Maruo et al. (2015).
 #'
 #' @param formula a two-sided linear formula object describing the model, with
 #'   the response on the left of a ~ operator and the terms, separated by +
@@ -21,7 +21,7 @@
 #'
 #' @return an object of class "\code{bcmarg}". Objects of this class have
 #' methods for the generic functions  \code{coef}, \code{logLik},
-#' \code{print}, and \code{summary}. The object includes following conponents
+#' \code{print}, and \code{summary}. The object includes following components
 #' for the marginal model parameter inference:
 #' \describe{
 #'   \item{\code{lambda}}{a numeric value of the estimate of the transformation

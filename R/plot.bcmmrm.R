@@ -42,7 +42,7 @@
 #'  The default is \code{NULL} and \code{1:ng} is used, where ng is number of
 #'  groups.
 #' @param main a main title for the plot. The default is \code{TRUE} and
-#'  default title is "(Longitudunal) Plot for median of each group".
+#'  default title is "(Longitudinal) Plot for median of each group".
 #' @param sub a sub title for the plot. The default is \code{NULL}.
 #' @param legend a logical optional value specifying to add legends to
 #'  plots. When \code{legend} is \code{TRUE} legends are added to the plot.

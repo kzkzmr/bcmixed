@@ -4,7 +4,7 @@
 #' \code{\link{bcmarg}} and \code{\link{bcmmrm}}. The \code{\link{bcmarg}}
 #' function provides inferences on the marginal model of the mixed effect
 #' model with the Box-Cox transformation and the \code{\link{bcmmrm}}
-#' provideson inferences on the model median differences between treatment
+#' provides inferences on the model median differences between treatment
 #' groups for longitudinal randomized clinical trials. These statistical
 #' methods are proposed by Maruo et al. (2017, doi:10.1002/sim.6408).
 #'

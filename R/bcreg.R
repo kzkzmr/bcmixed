@@ -12,7 +12,7 @@
 #' @param lmdint a vector containing the end-points of the interval to be
 #'   searched for a transformation parameter. Default is c(-3, 3).
 #'
-#' @return LmeMargBc returns a list including following conponents:
+#' @return bcreg returns a list including following components:
 #' \describe{
 #'   \item{\code{lambda}}{a numeric value with the estimate of
 #'         the transformation parameter.}
@@ -22,7 +22,7 @@
 #'         parameter.}
 #'   \item{\code{betainf}}{a data frame with inference results for \code{beta}
 #'         under the assumption that \code{lambda} is known.}
-#'   \item{\code{lik}}{a numeric value with the maximized liklihood.}
+#'   \item{\code{lik}}{a numeric value with the maximized likelihood.}
 #'   \item{\code{lmObject}}{an object of "\code{lm}" containing the results of
 #'         \code{lm} function on the transformed scale}
 #' }

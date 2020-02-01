@@ -18,7 +18,7 @@ formula.}
 searched for a transformation parameter. Default is c(-3, 3).}
 }
 \value{
-LmeMargBc returns a list including following conponents:
+bcreg returns a list including following components:
 \describe{
   \item{\code{lambda}}{a numeric value with the estimate of
         the transformation parameter.}
@@ -28,7 +28,7 @@ LmeMargBc returns a list including following conponents:
         parameter.}
   \item{\code{betainf}}{a data frame with inference results for \code{beta}
         under the assumption that \code{lambda} is known.}
-  \item{\code{lik}}{a numeric value with the maximized liklihood.}
+  \item{\code{lik}}{a numeric value with the maximized likelihood.}
   \item{\code{lmObject}}{an object of "\code{lm}" containing the results of
         \code{lm} function on the transformed scale}
 }

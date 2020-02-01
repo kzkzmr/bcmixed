@@ -4,7 +4,7 @@
 #' 1964).
 #'
 #' @param y a positive real number vector.
-#' @param lambda a scaler transformation parameter.
+#' @param lambda a scalar transformation parameter.
 #'
 #' @return bct returns the Box-Cox transformed numeric vector,
 #' \code{z = log(y)} for \code{lambda = 0},

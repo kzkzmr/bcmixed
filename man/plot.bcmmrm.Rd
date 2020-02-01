@@ -78,7 +78,7 @@ The default is \code{NULL} and \code{1:ng} is used, where ng is number of
 groups.}
 
 \item{main}{a main title for the plot. The default is \code{TRUE} and
-default title is "(Longitudunal) Plot for median of each group".}
+default title is "(Longitudinal) Plot for median of each group".}
 
 \item{sub}{a sub title for the plot. The default is \code{NULL}.}
 
