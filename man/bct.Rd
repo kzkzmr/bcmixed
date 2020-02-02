@@ -27,6 +27,7 @@ bct returns the Box-Cox transformed numeric vector,
 }
 \references{
 Box, G.E.P. and Cox, D.R. (1964). An analysis of transformations
-(with discussion). Journals of the Royal Statistical Society, Series B, 26,
-211-246.
+(with discussion).
+\emph{Journals of the Royal Statistical Society, Series B}, 26,
+211-246, \doi{10.1111/j.2517-6161.1964.tb00553.x}.
 }

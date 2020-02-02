@@ -3,3 +3,5 @@
 * Ubuntu 16.04 (on travis-ci), R-oldrel, R-release, R-devel
 ## R CMD check results
 * 0 ERRORs | 0 WARNINGs | 0 NOTES.
+## revdepcheck results
+There are currently no downstream dependencies for this package
