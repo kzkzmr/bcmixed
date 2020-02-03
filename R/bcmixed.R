@@ -11,8 +11,8 @@
 #' @details \tabular{ll}{
 #' Package:\tab bcmixed\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.9.0\cr
-#' Date: \tab 2020-01-30\cr
+#' Version: \tab 0.1.0\cr
+#' Date: \tab 2020-02-03\cr
 #' }
 #'
 #' @name bcmixed
