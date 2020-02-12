@@ -589,10 +589,10 @@ print.summary.bcmarg <- function(x, digits = 3, ...) {
         format(x$lambda, digits = digits), "\n")
     cat("\nCoefficients on the transformed scale:\n")
     print(betainf, digits = digits, ...)
-    cat("\n *NOTE* : Inference results under the assumption that \n")
-    cat("          the transformation parameter is known are provided.\n")
-    cat("          Although statistical tests would be asymptotically\n")
-    cat("          valid, standard errors might be underestimated.\n")
+    message("Note: Inference results under the assumption that
+      the transformation parameter is known are provided.
+      Although statistical tests would be asymptotically
+      valid, standard errors might be underestimated.")
     cat("\nCovariance parameters on the transformed scale:\n")
     print(x$alp, digits = digits)
     cat("\nCorrelations on the transformed scale:\n")
