@@ -35,7 +35,7 @@
 #'  summary(resar)
 #'
 #' @export
-summary.bcmmrm <- function(object, robust = T, ssadjust = T, ...) {
+summary.bcmmrm <- function(object, robust = TRUE, ssadjust = TRUE, ...) {
   if (robust & ssadjust) {
     med <- object$median.rob.adj
     dif <- object$meddif.rob.adj

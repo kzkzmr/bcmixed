@@ -28,7 +28,9 @@
 #'           parameter.}
 #'     \item{\code{R}}{a correlation matrix for transformed outcomes.}
 #'     \item{\code{betainf}}{inference results for beta under the assumption
-#'           that lambda is known.}
+#'           that lambda is known. Note that standard errors might be
+#'           underestimated although statistical tests would be asymptotically
+#'           valid.}
 #'     \item{\code{time.tbl}}{a data frame of a correspondence table for
 #'           the timepoints.}
 #'     \item{\code{group.tbl}}{a data frame of a correspondence table for

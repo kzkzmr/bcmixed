@@ -4,7 +4,7 @@
 \alias{summary.bcmmrm}
 \title{Summarize a bcmmrm Object.}
 \usage{
-\method{summary}{bcmmrm}(object, robust = T, ssadjust = T, ...)
+\method{summary}{bcmmrm}(object, robust = TRUE, ssadjust = TRUE, ...)
 }
 \arguments{
 \item{object}{an object inheriting from class "\code{bcmmrm}", representing

@@ -18,8 +18,8 @@ methods are proposed by Maruo et al. (2017,
 \tabular{ll}{
 Package:\tab bcmixed\cr
 Type: \tab Package\cr
-Version: \tab 0.1.1\cr
-Date: \tab 2020-02-03\cr
+Version: \tab 0.1.3\cr
+Date: \tab 2020-02-22\cr
 }
 }
 \author{

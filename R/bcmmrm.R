@@ -341,7 +341,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
 }
 
 #' @export
-logLik.bcmmrm <- function(object, REML = F, ...) {
+logLik.bcmmrm <- function(object, REML = FALSE, ...) {
   if (REML) {
     stop("REML method can not be used in bcmmrm.")
   }

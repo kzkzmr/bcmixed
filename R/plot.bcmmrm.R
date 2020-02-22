@@ -52,6 +52,8 @@
 #' from the list \code{"bottomright"}, \code{"bottom"}, \code{"bottomleft"},
 #' \code{"left"}, \code{"topleft"}, \code{"top"}, \code{"topright"},
 #' \code{"right"}, and \code{"center"}. The default is \code{"topright"}.
+#' @param  verbose a logical optional value specifying to print the detailed
+#' analysis information in the console. The default is \code{FALSE}.
 #' @param ... some methods for this generic require additional arguments.
 #'
 #' @return a median plot.
@@ -67,12 +69,12 @@
 #'  plot(resar, timepoint = 32, xlab = "Treatment", ylab = "CD4+1")
 #' @importFrom graphics plot grid lines arrows axis legend
 #' @export
-plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
-                        timepoint = NULL, tnom = T, xlab = NULL,
+plot.bcmmrm <- function(x, robust = TRUE, ssadjust = TRUE, dt = 1,
+                        timepoint = NULL, tnom = TRUE, xlab = NULL,
                         ylab = NULL, xlim = NULL, ylim = NULL,
                         lwd = 2, col = NULL, lty = NULL,
-                        main = T, sub = NULL, legend = T, loc = "topright",
-                        ...) {
+                        main = TRUE, sub = NULL, legend = TRUE,
+                        loc = "topright", verbose = FALSE, ...) {
   x <- summary(x, robust = robust, ssadjust = ssadjust)
   med <- x$median
   if (is.null(ylab)) {
@@ -104,7 +106,7 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
       xlab <- deparse(x$call$group)
     }
     if (!is.null(main)) {
-      if (main == T) {
+      if (main == TRUE) {
         main <- "Plot for model median of each group"
       }
     }
@@ -118,12 +120,14 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
     points(Group, med$median, lwd = lwd, col = col)
     arrows(Group, med$upper.CL, Group, med$lower.CL,
            code = 3, angle = 90, length = .07, lwd = lwd, col = col)
-    cat("Analysis information:\n")
-    cat("  Covariance structure:", deparse(x$call$structure), "\n")
-    cat("  Robust inference:", x$robust, "\n")
-    cat("  Empirical small sample adjustment:", x$ssadjust, "\n")
-    cat("\nError bar:", x$conf.level * 100, "% confidence interval\n")
-    cat("\nTimepoint:", deparse(x$call$time), "=", timepoint)
+    if (verbose) {
+      cat("Analysis information:\n")
+      cat("  Covariance structure:", deparse(x$call$structure), "\n")
+      cat("  Robust inference:", x$robust, "\n")
+      cat("  Empirical small sample adjustment:", x$ssadjust, "\n")
+      cat("\nError bar:", x$conf.level * 100, "% confidence interval\n")
+      cat("\nTimepoint:", deparse(x$call$time), "=", timepoint)
+    }
   } else {
     Time2 <- x$time.tbl$label
     Time1 <- x$time.tbl$code
@@ -202,10 +206,12 @@ plot.bcmmrm <- function(x, robust = T, ssadjust = T, dt = 1,
     if (legend) {
       legend(loc, legend = glabel, lty = lty, col = col, lwd = lwd)
     }
-    cat("Analysis information:\n")
-    cat("  Covariance structure:", deparse(x$call$structure), "\n")
-    cat("  Robust inference:", x$robust, "\n")
-    cat("  Empirical small sample adjustment:", x$ssadjust, "\n")
-    cat("\nError bar: 95% confidence interval\n")
+    if (verbose) {
+      cat("Analysis information:\n")
+      cat("  Covariance structure:", deparse(x$call$structure), "\n")
+      cat("  Robust inference:", x$robust, "\n")
+      cat("  Empirical small sample adjustment:", x$ssadjust, "\n")
+      cat("\nError bar: 95% confidence interval\n")
+    }
   }
 }

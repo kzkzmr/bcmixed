@@ -15,6 +15,8 @@
 #' @param main a main title for the plot. The default is \code{TRUE} and
 #'  default title is "Box-whisker plot for transformed residuals".
 #' @param sub a sub title for the plot. The default is \code{NULL}.
+#' @param  verbose a logical optional value specifying to print the detailed
+#' plot information in the console. The default is \code{FALSE}.
 #' @param ... some methods for this generic require additional arguments.
 #'
 #' @return a box-whisker plot for transformed residual.
@@ -34,15 +36,15 @@
 #' @importFrom stats sd
 #' @export
 boxplot.bcmmrm <- function(x, timepoint = NULL, xlab = NULL,
-                           ylab = NULL, main = T, sub = NULL, ...) {
-
+                           ylab = NULL, main = TRUE, sub = NULL,
+                           verbose = FALSE, ...) {
   if (is.null(timepoint)) {
     nt <- length(x$median.mod)
     timepoint <- x$time.tbl$label[nt]
   }
   dgdat <- x$outdata[x$outdata[, deparse(x$call$time)] ==
                         timepoint, ]
-  rgm <- ceiling(max(abs(dgdat$res.tr), na.rm = T))
+  rgm <- ceiling(max(abs(dgdat$res.tr), na.rm = TRUE))
   group <- deparse(x$call$group)
   if (is.null(xlab)) {
     xlab <- group
@@ -52,7 +54,8 @@ boxplot.bcmmrm <- function(x, timepoint = NULL, xlab = NULL,
   }
   if (!is.null(main)) {
     if (main) {
-      main <- "Box-whisker plot for transformed residuals"
+      main <- paste("Box-whisker plot for transformed residuals at",
+                    deparse(x$call$time), "=", timepoint)
     }
   }
   bp <- boxplot(dgdat$res.tr ~ dgdat[, group],
@@ -62,12 +65,14 @@ boxplot.bcmmrm <- function(x, timepoint = NULL, xlab = NULL,
   axis(1, at = x$group.tbl$code, labels = glabel)
   abline(h = 0)
   xi <- 0.2 + seq(bp$n)
-  mn.t <- tapply(dgdat$res.tr, dgdat[, group], mean, na.rm = T)
-  sd.t <- tapply(dgdat$res.tr, dgdat[, group], sd, na.rm = T)
+  mn.t <- tapply(dgdat$res.tr, dgdat[, group], mean, na.rm = TRUE)
+  sd.t <- tapply(dgdat$res.tr, dgdat[, group], sd, na.rm = TRUE)
   points(xi, mn.t, pch = 4)
   arrows(xi, mn.t - sd.t, xi, mn.t + sd.t,
          code = 3, angle = 75, length = .1)
-  cat("Plot information:\n")
-  cat("\nError bar plot: mean +- SD\n")
-  cat("\nTimepoint:", deparse(x$call$time), "=", timepoint)
+  if (verbose) {
+    cat("Plot information:\n")
+    cat("\nError bar plot: mean +- SD\n")
+    cat("\nTimepoint:", deparse(x$call$time), "=", timepoint)
+  }
 }

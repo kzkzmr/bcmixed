@@ -6,11 +6,11 @@
 \usage{
 \method{plot}{bcmmrm}(
   x,
-  robust = T,
-  ssadjust = T,
+  robust = TRUE,
+  ssadjust = TRUE,
   dt = 1,
   timepoint = NULL,
-  tnom = T,
+  tnom = TRUE,
   xlab = NULL,
   ylab = NULL,
   xlim = NULL,
@@ -18,10 +18,11 @@
   lwd = 2,
   col = NULL,
   lty = NULL,
-  main = T,
+  main = TRUE,
   sub = NULL,
-  legend = T,
+  legend = TRUE,
   loc = "topright",
+  verbose = FALSE,
   ...
 )
 }
@@ -91,6 +92,9 @@ The location can be specified by setting \code{loc} to a single keyword
 from the list \code{"bottomright"}, \code{"bottom"}, \code{"bottomleft"},
 \code{"left"}, \code{"topleft"}, \code{"top"}, \code{"topright"},
 \code{"right"}, and \code{"center"}. The default is \code{"topright"}.}
+
+\item{verbose}{a logical optional value specifying to print the detailed
+analysis information in the console. The default is \code{FALSE}.}
 
 \item{...}{some methods for this generic require additional arguments.}
 }

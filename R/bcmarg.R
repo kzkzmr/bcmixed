@@ -33,7 +33,9 @@
 #'   \item{\code{V}}{variance-covariance matrix for any subject with no missing
 #'         values.}
 #'   \item{\code{betainf}}{a matrix containing the inference results for
-#'        \code{beta} under the assumption that lambda is known.}
+#'        \code{beta} under the assumption that lambda is known.
+#'        Note that standard errors might be underestimated
+#'        although statistical tests would be asymptotically valid.}
 #'   \item{\code{Vtheta.mod}}{model-based variance-covariance matrix for MLE of
 #'         the vector of all parameters: \code{c(lambda, beta, alpha)}.}
 #'   \item{\code{Vtheta.rob}}{robust variance-covariance matrix for MLE of
@@ -85,7 +87,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
       if (nrow(corm) == nt) flg <- 1
     }
     varstruct <- glsob$modelStruct$varStruct
-    varests <- coef(varstruct, uncons = F, allCoef = T)
+    varests <- coef(varstruct, uncons = FALSE, allCoef = TRUE)
     covm <- corm * glsob$sigma ^ 2 * t(t(varests)) %*% t(varests)
     return(covm)
   }
@@ -129,7 +131,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
                 method = "ML", control = glsControl(msMaxIter = 100),
                 na.action = na.omit)
     }
-    return(RS$logLik[1] + (lmd - 1) * sum(log(y), na.rm = T))
+    return(RS$logLik[1] + (lmd - 1) * sum(log(y), na.rm = TRUE))
   }
 
   formula <- formula(formula)
@@ -150,7 +152,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
   }
   data$y <- data[, yc]
 
-  if (sum(data$y < 0, na.rm = T) > 0L) {
+  if (sum(data$y < 0, na.rm = TRUE) > 0L) {
     stop("outcome must be positive.")
   }
   if (deparse(substitute(time)) == "NULL" &
@@ -191,7 +193,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
       data1 <- rbind(data1, data01)
     }
     data2 <- data[, c("id", "time", "y")]
-    data <- merge(data2, data1, by = c("id", "time"), all = T)
+    data <- merge(data2, data1, by = c("id", "time"), all = TRUE)
     for (i in 1:nt) {
       data[data$time == i, timec] <- ttbl[i]
     }
@@ -200,7 +202,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
       try1 <- bcreg(formula, data, lmdint)
     } else {
       formula2 <- formula(paste("z~", evars))
-      try1 <- optimize(likn, interval = lmdint, maximum = T,
+      try1 <- optimize(likn, interval = lmdint, maximum = TRUE,
                        formula = formula2, data = data, structure = structure)
     }
   }
@@ -354,10 +356,10 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
   Jbs <- matrix(0, nb, ns)
   for  (j in 1:t2) {
     if (ndp[j] != 0) {
-      rj <- rt[dp == j, colf[[j]], drop = F]
+      rj <- rt[dp == j, colf[[j]], drop = FALSE]
       nj <- nrow(rj)
       lysj <- lysum[dp == j]
-      S <- V[colf[[j]], colf[[j]], drop = F]
+      S <- V[colf[[j]], colf[[j]], drop = FALSE]
       nSj <- nrow(S)
       cholS <- chol(S)
       mat0 <- matrix(0, nSj, nSj)
@@ -403,21 +405,21 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
         }
       }
       iS <- solve(S)
-      sSr <- backsolve(cholS, t(rj), transpose = T)
+      sSr <- backsolve(cholS, t(rj), transpose = TRUE)
       sxb <- list()
       sdz <- list()
       sddz <- list()
       xjb <- list()
       cs_xSr <- list()
-      dzj <- dzt[dp == j, colf[[j]], drop = F]
-      ddzj <- ddzt[dp == j, colf[[j]], drop = F]
-      sdz <- backsolve(cholS, t(dzj), transpose = T)
-      sddz <- backsolve(cholS, t(ddzj), transpose = T)
+      dzj <- dzt[dp == j, colf[[j]], drop = FALSE]
+      ddzj <- ddzt[dp == j, colf[[j]], drop = FALSE]
+      sdz <- backsolve(cholS, t(dzj), transpose = TRUE)
+      sddz <- backsolve(cholS, t(ddzj), transpose = TRUE)
       cs_zSr <- colSums(sdz * sSr)
       for (jb in 1:nb) {
-        xj <- Xb[[jb]][dp == j, colf[[j]], drop = F]
+        xj <- Xb[[jb]][dp == j, colf[[j]], drop = FALSE]
         xjb[[jb]] <- xj
-        sxb0 <- backsolve(cholS, t(xj), transpose = T)
+        sxb0 <- backsolve(cholS, t(xj), transpose = TRUE)
         sxb[[jb]] <- sxb0
         cs_xSr[[jb]] <- colSums(sxb0 * sSr)
       }
@@ -524,7 +526,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
 }
 
 #' @export
-logLik.bcmarg <- function(object, REML = F, ...) {
+logLik.bcmarg <- function(object, REML = FALSE, ...) {
   if (REML) {
     stop("REML method can not be used in bcmmrm.")
   }
@@ -589,10 +591,6 @@ print.summary.bcmarg <- function(x, digits = 3, ...) {
         format(x$lambda, digits = digits), "\n")
     cat("\nCoefficients on the transformed scale:\n")
     print(betainf, digits = digits, ...)
-    message("Note: Inference results under the assumption that
-      the transformation parameter is known are provided.
-      Although statistical tests would be asymptotically
-      valid, standard errors might be underestimated.")
     cat("\nCovariance parameters on the transformed scale:\n")
     print(x$alp, digits = digits)
     cat("\nCorrelations on the transformed scale:\n")

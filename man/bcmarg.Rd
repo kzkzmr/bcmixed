@@ -47,7 +47,9 @@ for the marginal model parameter inference:
   \item{\code{V}}{variance-covariance matrix for any subject with no missing
         values.}
   \item{\code{betainf}}{a matrix containing the inference results for
-       \code{beta} under the assumption that lambda is known.}
+       \code{beta} under the assumption that lambda is known.
+       Note that standard errors might be underestimated
+       although statistical tests would be asymptotically valid.}
   \item{\code{Vtheta.mod}}{model-based variance-covariance matrix for MLE of
         the vector of all parameters: \code{c(lambda, beta, alpha)}.}
   \item{\code{Vtheta.rob}}{robust variance-covariance matrix for MLE of

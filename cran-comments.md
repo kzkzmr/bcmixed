@@ -7,5 +7,6 @@
 ## revdepcheck results
 There are currently no downstream dependencies for this package
 ## Resubmission
-This is a resubmission. In this version, I have:
-* changed "Note" in the summary.bcmarg function to be displayed by the message function 
+This is a resubmission. In this version (0.1.3), I have:
+* added "verbose" option to the "plot.bcmmrm" and "boxplot.bcmmrm" functions
+* changed "T" -> "TRUE", "F" -> "FALSE"

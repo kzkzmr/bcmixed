@@ -9,8 +9,9 @@
   timepoint = NULL,
   xlab = NULL,
   ylab = NULL,
-  main = T,
+  main = TRUE,
   sub = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -31,6 +32,9 @@ the default title is "Transformed residuals".}
 default title is "Box-whisker plot for transformed residuals".}
 
 \item{sub}{a sub title for the plot. The default is \code{NULL}.}
+
+\item{verbose}{a logical optional value specifying to print the detailed
+plot information in the console. The default is \code{FALSE}.}
 
 \item{...}{some methods for this generic require additional arguments.}
 }

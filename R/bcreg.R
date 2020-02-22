@@ -47,7 +47,7 @@ bcreg <- function(formula, data, lmdint = c(-3, 3)) {
   formula <- formula(formula)
   data <- as.data.frame(data)
   y <- data[, as.character(formula)[2]]
-  if (sum(y < 0, na.rm = T) > 0L) {
+  if (sum(y < 0, na.rm = TRUE) > 0L) {
     stop("outcome must be positive.")
   }
   options(na.action = "na.pass")
@@ -69,7 +69,7 @@ bcreg <- function(formula, data, lmdint = c(-3, 3)) {
     lik <- -n / 2 * (log(2 * pi) + 1) - n * log(sgm) + (l - 1) * sum(log(y))
     return(lik)
   }
-  res <- optimize(lbc, interval = lmdint, maximum = T, y = y, X = X)
+  res <- optimize(lbc, interval = lmdint, maximum = TRUE, y = y, X = X)
   lmd <- res$maximum
   z <- (y ^ lmd - 1) / lmd
   beta <- ginv(t(X) %*% X) %*% t(X) %*% z
