@@ -1,3 +1,5 @@
+## bcmixed 0.1.4 (03-31-2020)
+* Added several generic functions for "bcmmrm" and "bcmarg" functions.
 ## bcmixed 0.1.3 (02-12-2020)
 * Revised in accordance with the comments from CRAN: added "verbose" option to the "plot.bcmmrm" and "boxplot.bcmmrm" functions.
 ## bcmixed 0.1.2 (02-12-2020)

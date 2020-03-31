@@ -69,8 +69,7 @@
 #' #        structure is used in this example to reduce calculation time
 #'
 #' # Box-Cox transformation for the baseline
-#' lmd.bl <- bcmarg(cd4.bl ~ 1, data = aidscd4[aidscd4$weekc == 8, ])$lambda
-#' aidscd4$cd4.bl.tr <- bct(aidscd4$cd4.bl, lmd.bl)
+#' aidscd4$cd4.bl.tr <- bct.v(aidscd4$cd4.bl)$transformed
 #'
 #' # Median inference for each group and week
 #' bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
@@ -85,6 +84,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                    covv = NULL, cfactor = NULL, structure = "UN",
                    conf.level = 0.95, lmdint = c(-3, 3),
                    glabel = NULL, tlabel = NULL) {
+  backup_options <- options()
   if (conf.level <= 0 | conf.level >= 1) {
     stop("conf.level must be within the range of c(0,1)")
   }
@@ -327,7 +327,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
   data$ytr.fitted <- data$ytr
   data$ytr.fitted[!is.na(data$ytr.fitted)] <- fitted
   data$res.tr <- data$ytr - data$ytr.fitted
-
+  options(backup_options)
   structure(class = "bcmmrm",
             list(call = Call, median.mod = median.mod,
                  median.rob = median.rob, median.mod.adj = median.mod.adj,
@@ -390,4 +390,30 @@ print.bcmmrm <- function(x, ...) {
       print(med, digits = 3, ...)
     }
     invisible(x)
+}
+
+#' @export
+vcov.bcmmrm <- function(object, robust = TRUE, ...) {
+  if (robust) {
+    vcov <- object$inf.marg$Vtheta.rob
+  } else {
+    vcov <- object$inf.marg$Vtheta.mod
+  }
+  return(vcov)
+}
+
+#' @export
+fitted.bcmmrm <- function(object, transformed = FALSE, ...) {
+  z <- object$outdata$ytr.fitted
+  if  (transformed) {
+    fitted <- z
+  } else {
+    lmd <- object$lambda
+    if (lmd == 0) {
+      fitted <- exp(z)
+    } else {
+      fitted <- (lmd * z + 1) ^ (1 / lmd)
+    }
+  }
+  return(fitted)
 }

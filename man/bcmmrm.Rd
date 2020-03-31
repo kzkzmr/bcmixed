@@ -90,8 +90,7 @@ data(aidscd4)
 #        structure is used in this example to reduce calculation time
 
 # Box-Cox transformation for the baseline
-lmd.bl <- bcmarg(cd4.bl ~ 1, data = aidscd4[aidscd4$weekc == 8, ])$lambda
-aidscd4$cd4.bl.tr <- bct(aidscd4$cd4.bl, lmd.bl)
+aidscd4$cd4.bl.tr <- bct.v(aidscd4$cd4.bl)$transformed
 
 # Median inference for each group and week
 bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,

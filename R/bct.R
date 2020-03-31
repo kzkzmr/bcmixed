@@ -22,7 +22,7 @@
 #' @export
 bct <- function(y, lambda) {
   if (sum(y < 0)) {
-    stop("All valuesin y must be positive.")
+    stop("All values in y must be positive.")
   }
   if (lambda == 0) {
     z <- log(y)

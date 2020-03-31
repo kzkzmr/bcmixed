@@ -58,7 +58,6 @@ bcreg <- function(formula, data, lmdint = c(-3, 3)) {
   flg.na <- !is.na(y)
   y <- y[flg.na]
   X <- X[flg.na, ]
-  n <- length(y)
   lbc <- function(l, y, X) {
     if (l == 0) z <- log(y)
     else z <- (y ^ l - 1) / l
@@ -72,16 +71,16 @@ bcreg <- function(formula, data, lmdint = c(-3, 3)) {
   res <- optimize(lbc, interval = lmdint, maximum = TRUE, y = y, X = X)
   lmd <- res$maximum
   z <- (y ^ lmd - 1) / lmd
-  beta <- ginv(t(X) %*% X) %*% t(X) %*% z
-  zm <- z - X %*% beta
-  sgm <- sqrt(sum(zm ^ 2) / n)
   lik <- res$objective
   data <- as.data.frame(data[flg.na, ])
   data$z <- as.numeric(z)
   evars <- as.character(formula)[3]
   formula2 <- formula(paste("z~", evars))
   lmres <- lm(formula2, data)
+  beta <- coef(lmres)
+  sgm <- summary(lmres)$sigma
+  names(sgm) <- "Residual"
   bcres <- as.data.frame(summary(lmres)$coefficients)
-  list(lambda = lmd, beta = as.numeric(beta), sigma = sgm,
+  list(lambda = lmd, beta = beta, sigma = sgm,
             betainf = bcres, logLik = lik, lmObject = lmres)
 }

@@ -76,6 +76,7 @@
 #' @export
 bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
                    lmdint = c(-3, 3)) {
+  backup_options <- options()
   Call <- match.call()
   tr <- function(X) sum(diag(X))
   covcalcUN <- function(glsob, nt) {
@@ -203,7 +204,8 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
     } else {
       formula2 <- formula(paste("z~", evars))
       try1 <- optimize(likn, interval = lmdint, maximum = TRUE,
-                       formula = formula2, data = data, structure = structure)
+                       formula = formula(paste("z~", evars)), data = data,
+                       structure = structure)
     }
   }
 
@@ -211,6 +213,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
     le <- try1$lambda
     beta <- try1$beta
     alp <- try1$sigma ^ 2
+    names(alp) <- "Residual"
     V <- as.matrix(alp)
     data$z <- (data$y ^ le - 1) / le
     bcres <- try1$betainf
@@ -249,7 +252,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
       names(alp) <- c("ID", "Residual")
     }
     if (structure == "AR(1)") {
-      RS <- gls(model = formula2, data = data,
+      RS <- gls(model = eval(formula2), data = data,
                 correlation = corAR1(form = ~ time | id),
                 method = "ML", control = glsControl(msMaxIter = 100),
                 na.action = na.omit)
@@ -518,6 +521,13 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
              cbind(t(Jls), t(Jbs), Js))
   iII <- ginv(-H)
   iIIr <- iII %*% J %*% iII
+  Vname <- c("lambda", paste("beta:", names(beta)),
+             paste("alpha:", names(alp)))
+  colnames(iII) <- Vname
+  row.names(iII) <- Vname
+  colnames(iIIr) <- Vname
+  row.names(iIIr) <- Vname
+  options(backup_options)
   structure(class = "bcmarg",
             list(call = Call, formula = formula, lambda = le, beta = beta,
                  alpha = alp, V = V, betainf = bcres, Vtheta.mod = iII,
@@ -596,4 +606,31 @@ print.summary.bcmarg <- function(x, digits = 3, ...) {
     cat("\nCorrelations on the transformed scale:\n")
     print(R, digits = digits, ...)
     invisible(x)
+}
+
+#' @export
+vcov.bcmarg <- function(object, robust = TRUE, ...) {
+  if (robust) {
+    vcov <- object$Vtheta.rob
+  } else {
+    vcov <- object$Vtheta.mod
   }
+  return(vcov)
+}
+
+
+#' @export
+fitted.bcmarg <- function(object, transformed = FALSE, ...) {
+  z <- fitted(object$glsObject)
+  if  (transformed) {
+    fitted <- z
+  } else {
+    lmd <- object$lambda
+    if (lmd == 0) {
+      fitted <- exp(z)
+    } else {
+      fitted <- (lmd * z + 1) ^ (1 / lmd)
+    }
+  }
+  return(fitted)
+}

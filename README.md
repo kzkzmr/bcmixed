@@ -73,11 +73,6 @@ summary(res1)
 #> as.factor(treatment)3:as.factor(weekc)32 -0.1018   0.15353  -0.663   0.507
 #> as.factor(treatment)4:as.factor(weekc)32  0.1436   0.15162   0.947   0.344
 #> 
-#>  *NOTE* : Inference results under the assumption that 
-#>           the transformation parameter is known are provided.
-#>           Although statistical tests would be asymptotically
-#>           valid, standard errors might be underestimated.
-#> 
 #> Covariance parameters on the transformed scale:
 #> UN(1,1) UN(1,2) UN(1,3) UN(1,4) UN(2,2) UN(2,3) UN(2,4) UN(3,3) UN(3,4) UN(4,4) 
 #>    3.72    2.76    2.61    2.34    3.47    2.67    2.56    3.24    2.68    3.27 
@@ -218,7 +213,7 @@ summary(res2)
 #> 5 Zid+Did+Nev     Zid+Zal  8.34 1.60    5.206    11.48    5.23   0.000
 #> 6 Zid+Did+Nev     Zid+Did  6.70 1.71    3.338    10.06    3.92   0.000
 
-plot(res2, ylab = "CD4+1", xlab = "Week")
+plot(res2, ylab = "CD4+1", xlab = "Week", verbose = TRUE)
 ```
 
 <img src="man/figures/README-example-1.png" width="100%" />
