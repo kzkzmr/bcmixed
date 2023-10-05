@@ -18,7 +18,7 @@
 #' @references Box, G.E.P. and Cox, D.R. (1964). An analysis of transformations
 #' (with discussion).
 #' \emph{Journals of the Royal Statistical Society, Series B}, 26,
-#' 211-246, \url{https://doi.org/10.1111/j.2517-6161.1964.tb00553.x}.
+#' 211-246, \doi{10.1111/j.2517-6161.1964.tb00553.x}.
 #'
 #' @examples
 #'   y <- exp(rnorm(50))
@@ -31,6 +31,10 @@ bct.v <- function(y, lmdint = c(-3, 3)) {
   }
   if (sum(y <= 0) != 0) {
     stop("The argument includes non-positive value(s)")
+  }
+  if (sum(is.na(y)) > 0) {
+    y <- y[!is.na(y)]
+    warning("Missing values are excluded.")
   }
   lambda <- bcreg(y ~ 1, data.frame(y = y), lmdint)$lambda
   z <- bct(y, lambda)

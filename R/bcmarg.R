@@ -54,11 +54,11 @@
 #'   \item Maruo, K., Isogawa, N., Gosho, M. (2015). Inference of median
 #'         difference based on the Box-Cox model in randomized clinical trials.
 #'         \emph{Statistics in Medicine}, 34, 1634-1644,
-#'         \url{https://doi.org/10.1002/sim.6408}.\cr
+#'         \doi{10.1002/sim.6408}.\cr
 #'   \item Maruo, K., Yamaguchi, Y., Noma, H., Gosho, M. (2017). Interpretable
 #'         inference on the mixed effect model with the Box-Cox transformation.
 #'         \emph{Statistics in Medicine}, 36, 2420-2434,
-#'         \url{https://doi.org/10.1002/sim.7279}.
+#'         \doi{10.1002/sim.7279}.
 #' }
 #'
 #' @seealso \code{\link{bcmmrm}} \code{\link{gls}}
@@ -71,7 +71,7 @@
 #' @importFrom nlme gls glsControl corSymm varIdent corCompSymm corAR1
 #'             corMatrix
 #' @importFrom MASS ginv
-#' @importFrom stats coef ftable model.matrix na.omit optimize xtabs
+#' @importFrom stats coef ftable model.matrix na.omit optimize xtabs predict
 #'
 #' @export
 bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
@@ -231,6 +231,7 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
                 correlation = corSymm(form = ~ time | id),
                 weights = varIdent(form = ~ 1 | time), method = "ML",
                 control = glsControl(msMaxIter = 100), na.action = na.omit)
+      RS$call$model <- eval(formula2)
       V <- covcalcUN(RS, nt)
       alp <- c()
       nmalp <- c()
@@ -247,15 +248,17 @@ bcmarg <- function(formula, data, time = NULL, id = NULL, structure = "UN",
                 correlation = corCompSymm(form = ~ time | id),
                 method = "ML", control = glsControl(msMaxIter = 100),
                 na.action = na.omit)
+      RS$call$model <- eval(formula2)
       V <- covcalcCSAR(RS, nt)
       alp <- c(V[1, 2], V[1, 1] - V[1, 2])
       names(alp) <- c("ID", "Residual")
     }
     if (structure == "AR(1)") {
-      RS <- gls(model = eval(formula2), data = data,
+      RS <- gls(model = formula2, data = data,
                 correlation = corAR1(form = ~ time | id),
                 method = "ML", control = glsControl(msMaxIter = 100),
                 na.action = na.omit)
+      RS$call$model <- eval(formula2)
       V <- covcalcCSAR(RS, nt)
       alp <- c(V[1, 1], V[1, 2] / V[1, 1])
       names(alp) <- c("Variance", "Correlation")
@@ -633,4 +636,25 @@ fitted.bcmarg <- function(object, transformed = FALSE, ...) {
     }
   }
   return(fitted)
+}
+
+
+#' @export
+predict.bcmarg <- function(object, newdata = NULL, transformed = FALSE, ...) {
+  if (missing(newdata)) {
+    z <- predict(object$glsObject)
+  } else {
+    z <- predict(object$glsObject, newdata)
+  }
+  if  (transformed) {
+    pred<- z
+  } else {
+    lmd <- object$lambda
+    if (lmd == 0) {
+      pred<- exp(z)
+    } else {
+      pred <- (lmd * z + 1) ^ (1 / lmd)
+    }
+  }
+  return(pred)
 }

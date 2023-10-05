@@ -1,7 +1,7 @@
 Package: bcmixed
 Type: Package
 Title: Mixed Effect Model with the Box-Cox Transformation
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(person("Kazushi", "Maruo", email = "kazushi.maruo@gmail.com",
                   role = c("aut", "cre")),
                  person("Ryota", "Ishii", role = "aut"),
@@ -21,4 +21,4 @@ Suggests:
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.3

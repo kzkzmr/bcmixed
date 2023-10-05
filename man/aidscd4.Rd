@@ -4,7 +4,8 @@
 \name{aidscd4}
 \alias{aidscd4}
 \title{CD4 Cells Count Data in Aids Randomized Controlled Clinical Trial.}
-\format{A data frame with 4708 observations on the following 7 variables:
+\format{
+A data frame with 4708 observations on the following 7 variables:
   \describe{
     \item{\code{id}}{patient identifier; in total there are 1177 patients.}
     \item{\code{weekc}}{nominal visit variable (weeks 8, 16, 24, 32).}
@@ -17,7 +18,8 @@
     \item{\code{sex}}{patients' sex (1 = male, 0 = female)}
     \item{\code{cd4.bl}}{baseline value of CD4 cells count + 1.}
     \item{\code{cd4}}{CD4 cells count + 1.}
-  }}
+  }
+}
 \source{
 \url{https://www.hsph.harvard.edu/fitzmaur/ala/}
 }
@@ -46,9 +48,9 @@ data(aidscd4)
         alternating drug) for the treatment of advanced AIDS.
         \emph{Journal of Acquired Immune Deficiency Syndromes and
         Human Retrovirology}, 19, 339-349,
-        \url{https://doi.org/10.1097/00042560-199812010-00004}.
+        \doi{10.1097/00042560-199812010-00004}.
   \item Fitzmaurice, G.M., Laird, N.M., and Ware, J.H. (2011).
         \emph{Applied Longitudinal Analysis 2nd ed.}, Wiley, New York,
-        \url{https://doi.org/10.1002/9781119513469}.
+        \doi{10.1002/9781119513469}.
   }
 }

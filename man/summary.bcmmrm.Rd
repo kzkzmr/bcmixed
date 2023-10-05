@@ -40,7 +40,9 @@ of \code{object}.
 }
 \examples{
  data(aidscd4)
- resar <- bcmarg(cd4 ~ as.factor(treatment), aidscd4, weekc, id, "AR(1)")
+ resar <- bcmmrm(outcome = cd4, group = treatment, data = aidscd4,
+                 time = weekc, id = id, structure = "AR(1)",
+                 glabel = c("Zid/Did", "Zid+Zal", "Zid+Did", "Zid+Did+Nev"))
  summary(resar)
 
 }

@@ -104,11 +104,11 @@ bcmmrm(outcome = cd4, group = treatment, data = aidscd4, time = weekc,
   \item Maruo, K., Isogawa, N., Gosho, M. (2015). Inference of median
         difference based on the Box-Cox model in randomized clinical trials.
         \emph{Statistics in Medicine}, 34, 1634-1644,
-        \url{https://doi.org/10.1002/sim.6408}.\cr
+        \doi{10.1002/sim.6408}.\cr
   \item Maruo, K., Yamaguchi, Y., Noma, H., Gosho, M. (2017). Interpretable
         inference on the mixed effect model with the Box-Cox transformation.
         \emph{Statistics in Medicine}, 36, 2420-2434,
-        \url{https://doi.org/10.1002/sim.7279}.
+        \doi{10.1002/sim.7279}.
 }
 }
 \seealso{
