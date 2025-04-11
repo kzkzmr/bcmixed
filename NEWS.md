@@ -1,6 +1,5 @@
-## bcmixed 0.1.5 (10-06-2023)
-* Added the reference of this package. Missing data is automatically removed in 
-bct.v function. Corrected typos in help files of several functions. etc.
+## bcmixed 0.1.5 (11-04-2025)
+* Added the reference of this package. Missing data is automatically removed in bct.v function. Corrected typos in help files of several functions. etc.
 ## bcmixed 0.1.4 (03-31-2020)
 * Added several generic functions for "bcmmrm" and "bcmarg" functions.
 ## bcmixed 0.1.3 (02-12-2020)

@@ -14,7 +14,7 @@
 #' None are used in this method.
 #'
 #' @return an object inheriting from class \code{summary.bcmmrm} with all
-#' components included in \code{object} (see \code{\link{glsObject}} for
+#' components included in \code{object} (see \code{\link[nlme]{glsObject}} for
 #' a full description of the components) plus the following components:
 #' \describe{
 #'   \item{\code{median}}{a list including inference results of the model median

@@ -61,7 +61,7 @@
 #'         \doi{10.1002/sim.7279}.
 #' }
 #'
-#' @seealso \code{\link{bcmmrm}} \code{\link{gls}}
+#' @seealso \code{\link{bcmmrm}} \code{\link[nlme]{gls}}
 #'
 #' @examples
 #'  data(aidscd4)
