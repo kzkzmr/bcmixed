@@ -1,3 +1,5 @@
+## bcmixed 0.1.6 (21-03-2025)
+* A logical variable has been implemented to specify whether to include the interaction between time and covariates in the model.
 ## bcmixed 0.1.5 (11-04-2025)
 * Added the reference of this package. Missing data is automatically removed in bct.v function. Corrected typos in help files of several functions. etc.
 ## bcmixed 0.1.4 (03-31-2020)

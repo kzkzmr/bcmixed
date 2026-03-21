@@ -13,6 +13,7 @@ Inference on the marginal model of the mixed effect model with the Box-Cox trans
 
 Authors:
 \itemize{
+  \item Kazushi Maruo \email{kazushi.maruo@gmail.com}
   \item Ryota Ishii
 }
 

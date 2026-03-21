@@ -21,7 +21,7 @@ A data frame with 4708 observations on the following 7 variables:
   }
 }
 \source{
-\url{https://www.hsph.harvard.edu/fitzmaur/ala/}
+\url{https://content.sph.harvard.edu/fitzmaur/ala2e/}
 }
 \description{
 The data are from a randomized, double-blind study of acquired immune

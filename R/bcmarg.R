@@ -68,8 +68,7 @@
 #'  bcmarg(cd4 ~ as.factor(treatment) * as.factor(weekc) + age,
 #'         data = aidscd4, time = weekc, id = id, structure = "AR(1)")
 #'
-#' @importFrom nlme gls glsControl corSymm varIdent corCompSymm corAR1
-#'             corMatrix
+#' @importFrom nlme gls glsControl corSymm varIdent corCompSymm corAR1 corMatrix
 #' @importFrom MASS ginv
 #' @importFrom stats coef ftable model.matrix na.omit optimize xtabs predict
 #'
