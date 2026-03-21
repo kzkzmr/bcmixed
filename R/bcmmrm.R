@@ -34,6 +34,9 @@
 #' @param tlabel a vector of length number of repeated measures containing
 #'   the labels of \code{time} variable. The default is \code{NULL} and the
 #'   levels of \code{time} variable in \code{data} are used.
+#' @param covint a logical value that specifies whether to include the
+#'   interaction between time and covariate(s) in the model. The default is
+#'   \code{FALSE}.
 #'
 #' @return an object of class "\code{bcmmrm}" representing the results of model
 #'   median inference based on the Box-Cox transformed MMRM model.
@@ -83,7 +86,8 @@
 bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                    covv = NULL, cfactor = NULL, structure = "UN",
                    conf.level = 0.95, lmdint = c(-3, 3),
-                   glabel = NULL, tlabel = NULL) {
+                   glabel = NULL, tlabel = NULL, covint = FALSE) {
+
   backup_options <- options()
   if (conf.level <= 0 | conf.level >= 1) {
     stop("conf.level must be within the range of c(0,1)")
@@ -100,9 +104,17 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     cct <- numeric(length(covv)) + 1
     for (i in seq_len(length(covv))) {
       if (cfactor[i] == 0) {
-        covform <- paste(covform, "+", covv[i])
+        if (!covint | i != 1){
+          covform <- paste(covform, "+", covv[i])
+        } else {
+          covform <- covv[i]
+        }
       } else {
-        covform <- paste(covform, "+as.factor(", covv[i], ")")
+        if (!covint | i != 1){
+          covform <- paste(covform, "+as.factor(", covv[i], ")")
+        } else {
+          covform <- paste("as.factor(", covv[i], ")")
+        }
         cct[i] <- length(unique(data0[, covv[i]])) - 1
       }
     }
@@ -112,7 +124,6 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
     glabel <- names(table(as.factor(data0$group)))
   }
   group.tbl <- data.frame(code = 1:ng, label = glabel)
-
   if (deparse(substitute(time)) != "NULL" &
       deparse(substitute(id)) != "NULL") {
     if (is.null(Call$structure)) {
@@ -126,8 +137,13 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
       data0[data0$time0 == time.tbl[i], "time"] <- i
     }
     data0$id <- data0[, id]
-    formula <- formula(paste("y ~ as.factor(group) + as.factor(time) +
-                             as.factor(group):as.factor(time)", covform))
+    if (covint & !is.null(covv)){
+      formula <- formula(paste("y ~ as.factor(group) * as.factor(time) +
+                               as.factor(time) * (", covform, ")"))
+    } else {
+      formula <- formula(paste("y ~ as.factor(group) * as.factor(time)",
+                               covform))
+    }
     nt <- length(unique(data0$time))
     if (is.null(tlabel)) {
       tlabel <- time.tbl
@@ -223,8 +239,22 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
       dbt[tp0 - 1] <- 1
     }
     bc <- 0
+    bct <- 0
     if (!is.null(covv)) {
       bc <- beta[(ng + nt):(ng + nt + nc - 1)]
+      if (covint) {
+        bct0 <- beta[(ng + nt + nc + (nt - 1) * (ng - 1)):nb]
+        if (tp0 == 1) {
+          bct <- numeric(nc)
+        } else {
+          bct <- bct0[seq(tp0 - 1, (nt - 1) * (nc - 1) + (tp0 - 1),
+                          by = (nt - 1))]
+        }
+        dbct <- numeric(length(bct0))
+        for (ic in 1:nc) {
+          dbct[bct0 == bct[ic]] <- xcm[ic]
+        }
+      }
     }
     dtv <- numeric(ns)
     SExi <- numeric(ng)
@@ -244,13 +274,20 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
         bgt <- beta[ng + nt + nc - 1 + bgti]
         dbgt[bgti] <- 1
       }
-      xi[i] <- (le * (beta[1] + bg + bt + bgt + sum(xcm * bc)) + 1) ^ (1 / le)
+      xi[i] <- (le * (beta[1] + bg + bt + bgt + sum(xcm * bc) + sum(xcm * bct))
+                + 1) ^ (1 / le)
       dtl <- le ^ (-2) * xi[i] * (1 - le * log(xi[i]) - xi[i] ^ (-le))
+      beta_loc <- numeric(nb)
       if (!is.null(covv)) {
-        dtb <- xi[i] ^ (1 - le) * c(1, dbg, dbt, xcm, dbgt)
+        if (covint) {
+          beta_loc <- c(1, dbg, dbt, xcm, dbgt, dbct)
+        } else {
+          beta_loc <- c(1, dbg, dbt, xcm, dbgt)
+        }
       } else {
-        dtb <- xi[i] ^ (1 - le) * c(1, dbg, dbt, dbgt)
+        beta_loc <-  c(1, dbg, dbt, dbgt)
       }
+      dtb <- xi[i] ^ (1 - le) *  beta_loc
       Dt[, i] <- c(dtl, dtb, dtv)
       SExi[i] <- sqrt(c(t(Dt[, i]) %*% iII %*% Dt[, i]))
       SExir[i] <- sqrt(c(t(Dt[, i]) %*% iIIr %*% Dt[, i]))
@@ -339,6 +376,7 @@ bcmmrm <- function(outcome, group, data, time = NULL, id = NULL,
                  group.tbl = group.tbl, inf.marg = try1, outdata = data,
                  conf.level = conf.level))
 }
+
 
 #' @export
 logLik.bcmmrm <- function(object, REML = FALSE, ...) {

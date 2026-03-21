@@ -16,7 +16,8 @@ bcmmrm(
   conf.level = 0.95,
   lmdint = c(-3, 3),
   glabel = NULL,
-  tlabel = NULL
+  tlabel = NULL,
+  covint = FALSE
 )
 }
 \arguments{
@@ -57,6 +58,10 @@ levels of \code{group} variable in \code{data} are used.}
 \item{tlabel}{a vector of length number of repeated measures containing
 the labels of \code{time} variable. The default is \code{NULL} and the
 levels of \code{time} variable in \code{data} are used.}
+
+\item{covint}{a logical value that specifies whether to include the
+interaction between time and covariate(s) in the model. The default is
+\code{FALSE}.}
 }
 \value{
 an object of class "\code{bcmmrm}" representing the results of model

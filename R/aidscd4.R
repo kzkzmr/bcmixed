@@ -30,7 +30,7 @@
 #'
 #' @examples data(aidscd4)
 #'
-#' @source \url{https://www.hsph.harvard.edu/fitzmaur/ala/}
+#' @source \url{https://content.sph.harvard.edu/fitzmaur/ala2e/}
 #'
 #' @references \itemize{
 #'   \item Henry, K., Erice, A., Tierney, C., Balfour, H.H. Jr., Fischl, M.A.,

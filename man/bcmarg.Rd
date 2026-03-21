@@ -90,5 +90,5 @@ for the marginal model parameter inference:
 }
 }
 \seealso{
-\code{\link{bcmmrm}} \code{\link{gls}}
+\code{\link{bcmmrm}} \code{\link[nlme]{gls}}
 }
